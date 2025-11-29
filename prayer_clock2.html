@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prayer Times Display</title>
+
+  <!-- Include Moment.js & Moment Hijri -->
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment-hijri@2.1.0/moment-hijri.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #000 url("background.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      text-align: center;
+    }
+    .overlay {
+      background: rgba(0, 0, 0, 0.55);
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .clock-main {
+      margin-top: 30px;
+      font-size: 60px;
+      font-weight: bold;
+      text-shadow: 0px 0px 15px cyan;
+    }
+    .title {
+      font-size: 34px;
+      margin-top: 15px;
+      font-weight: bold;
+      color: yellow;
+    }
+    .prayer-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .prayer-block {
+      width: 30%;
+      min-width: 220px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 10px;
+      padding: 15px;
+      margin: 10px;
+      text-shadow: 0px 0px 8px black;
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+    .prayer-block.current {
+      background: rgba(50, 100, 200, 0.6);
+      box-shadow: 0 0 15px cyan;
+    }
+    .prayer-title {
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .countdown {
+      font-size: 20px;
+      margin-top: 8px;
+      color: #00ffea;
+    }
+    canvas {
+      margin-top: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+    .date-box {
+      position: absolute;
+      top: 55px;
+      left: 60px;
+      color: green;
+      font-size: 18px;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      border-radius: 5px;
+    }
+    @media (max-width: 800px) {
+      .prayer-block { width: 45%; }
+    }
+    @media (max-width: 500px) {
+      .prayer-block { width: 90%; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="overlay"></div>
+
+  <!-- Gregorian & Hijri Dates -->
+  <div class="date-box" id="dateBox">
+    <div id="gregorianDate"></div>
+    <div id="hijriDate"></div>
+  </div>
+
+  <div class="clock-main" id="mainClock">00:00:00</div>
+  <div class="title">UMAR MASJID PRAYER TIMES</div>
+
+  <div class="prayer-row">
+    <div class="prayer-block" id="blockFajr">
+      <div class="prayer-title">Fajr: <span id="Fajr"></span></div>
+      <canvas id="clockFajr" width="150" height="150"></canvas>
+      <div class="countdown" id="countFajr"></div>
+    </div>
+    <div class="prayer-block" id="blockDhuhr">
+      <div class="prayer-title">Dhuhr: <span id="Dhuhr"></span></div>
+      <canvas id="clockDhuhr" width="150" height="150"></canvas>
+      <div class="countdown" id="countDhuhr"></div>
+    </div>
+    <div class="prayer-block" id="blockAsr">
+      <div class="prayer-title">Asr: <span id="Asr"></span></div>
+      <canvas id="clockAsr" width="150" height="150"></canvas>
+      <div class="countdown" id="countAsr"></div>
+    </div>
+  </div>
+
+  <div class="prayer-row">
+    <div class="prayer-block" id="blockMaghrib">
+      <div class="prayer-title">Maghrib: <span id="Maghrib"></span></div>
+      <canvas id="clockMaghrib" width="150" height="150"></canvas>
+      <div class="countdown" id="countMaghrib"></div>
+    </div>
+    <div class="prayer-block" id="blockIsha">
+      <div class="prayer-title">Isha: <span id="Isha"></span></div>
+      <canvas id="clockIsha" width="150" height="150"></canvas>
+      <div class="countdown" id="countIsha"></div>
+    </div>
+    <div class="prayer-block" id="blockKhutbah">
+      <div class="prayer-title">Friday Khutbah: <span id="Khutbah"></span></div>
+      <canvas id="clockKhutbah" width="150" height="150"></canvas>
+      <div class="countdown" id="countKhutbah"></div>
+    </div>
+  </div>
+
+<script>
+/* STATIC PRAYER TIMES */
+const prayerTimes = {
+  Fajr: "05:12",
+  Dhuhr: "12:45",
+  Asr: "16:15",
+  Isha: "19:45",
+  Khutbah: "13:00" // Friday Khutbah at 13:00
+};
+
+window.prayerTimesFull = Object.assign({}, prayerTimes);
+
+/* MAIN CLOCK */
+function updateMainClock(){
+  const now = new Date();
+  document.getElementById("mainClock").innerText =
+    now.toLocaleTimeString("en-US",{ hour12:true });
+}
+setInterval(updateMainClock, 1000);
+updateMainClock();
+
+/* COUNTDOWN & HIGHLIGHT */
+function getPrayerDate(timeStr){
+  const [h, m] = timeStr.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  if (d <= new Date()) d.setDate(d.getDate() + 1);
+  return d;
+}
+
+setInterval(updateMainClock, 1000);
+updateMainClock();
+
+/* COUNTDOWN FOR FRIDAY Khutbah (WEEKLY COUNTDOWN) */
+function getNextFriday() {
+  const now = new Date();
+  const currentDay = now.getDay();  // 0: Sunday, 1: Monday, ..., 5: Friday
+  const daysUntilFriday = (5 - currentDay + 7) % 7;  // Calculate days until the next Friday
+
+  const nextFriday = new Date(now);
+  nextFriday.setDate(now.getDate() + daysUntilFriday);  // Move to the next Friday
+  nextFriday.setHours(13, 0, 0, 0);  // Set time to 13:00
+
+  return nextFriday;
+}
+
+function updateKhutbahCountdown() {
+  const nextFriday = getNextFriday();
+  const now = new Date();
+
+  const diff = nextFriday - now;
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  const countdownStr = `Time remaining: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+  document.getElementById("countKhutbah").innerText = countdownStr;
+}
+
+setInterval(updateKhutbahCountdown, 1000); // Update every second
+
+function updateCountdowns(){
+  const now = new Date();
+  let closestDiff = Infinity;
+  let currentPrayer = null;
+
+  for (const p of ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]) {
+    const elCount = document.getElementById("count" + p);
+    const time = window.prayerTimesFull[p];
+    if (!time) continue;
+    const pd = getPrayerDate(time);
+    const diff = pd - now;
+
+    const h = Math.floor(diff / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+    elCount.innerText = `Time remaining: ${h}h ${m}m ${s}s`;
+
+    if (diff >= 0 && diff < closestDiff) {
+      closestDiff = diff;
+      currentPrayer = p;
+    }
+  }
+
+  // Highlight current prayer
+  for (const p of ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha", "Khutbah"]) {
+    const block = document.getElementById("block" + p);
+    if (p === currentPrayer) {
+      block.classList.add("current");
+    } else {
+      block.classList.remove("current");
+    }
+  }
+}
+setInterval(updateCountdowns, 1000);
+
+/* ANALOG CLOCK */
+function drawClock(canvasId, timeStr) {
+  const [h, m] = timeStr.split(":").map(Number);
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  const radius = canvas.height / 2;
+  ctx.translate(radius, radius);
+
+  function drawFace() {
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.95, 0, 2 * Math.PI);
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    ctx.fill();
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.08, 0, 2 * Math.PI);
+    ctx.fillStyle = "white";
+    ctx.fill();
+  }
+
+  function drawNumbers() {
+    ctx.font = radius * 0.18 + "px arial";
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    for (let num = 1; num <= 12; num++) {
+      let ang = num * Math.PI / 6;
+      ctx.rotate(ang);
+      ctx.translate(0, -radius * 0.75);
+      ctx.rotate(-ang);
+      ctx.fillText(num.toString(), 0, 0);
+      ctx.rotate(ang);
+      ctx.translate(0, radius * 0.75);
+      ctx.rotate(-ang);
+    }
+  }
+
+  function drawHands(hour, minute) {
+    hour = hour % 12;
+    hour = (hour * Math.PI) / 6 + (minute * Math.PI) / (6 * 60);
+    drawHand(hour, radius * 0.5, 5);
+    drawHand((minute * Math.PI) / 30, radius * 0.8, 3);
+  }
+
+  function drawHand(pos, length, width) {
+    ctx.beginPath();
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+    ctx.moveTo(0, 0);
+    ctx.rotate(pos);
+    ctx.lineTo(0, -length);
+    ctx.stroke();
+    ctx.rotate(-pos);
+  }
+
+  ctx.clearRect(-radius, -radius, canvas.width, canvas.height);
+  drawFace();
+  drawNumbers();
+  drawHands(h, m);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+/* STATIC CLOCKS */
+for (const p of ["Fajr", "Dhuhr", "Asr", "Isha", "Khutbah"]) {
+  const t = prayerTimes[p];
+  document.getElementById(p).innerText = t;
+  drawClock("clock" + p, t);
+}
+
+/* FETCH MAGHRIB TIME */
+async function fetchMaghrib() {
+  try {
+    const city = "Birmingham"; // Replace with your city name
+    const country = "United Kingdom"; // Replace with your country name
+    const method = 2; // Default calculation method for prayer times
+    const res = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=${method}`);
+    const data = await res.json();
+    const t = data.data.timings.Maghrib.match(/^(\d{1,2}):(\d{2})/);
+    if (t) {
+      const maghribTime = t[1].padStart(2, "0") + ":" + t[2];
+      window.prayerTimesFull.Maghrib = maghribTime;
+      document.getElementById("Maghrib").innerText = maghribTime;
+      drawClock("clockMaghrib", maghribTime);
+    }
+  } catch (e) {
+    console.warn("Maghrib fetch failed");
+  }
+}
+
+// Fetch Maghrib prayer time immediately and every 24 hours
+fetchMaghrib();
+setInterval(fetchMaghrib, 24 * 60 * 60 * 1000); // 24 hours
+
+/* SHOW GREGORIAN AND HIJRI DATES */
+function updateDate() {
+  const gregorian = moment().format("dddd, MMMM Do YYYY"); // Gregorian date
+  const hijri = moment().format("iDD iMMMM iYYYY"); // Hijri date
+
+  document.getElementById("gregorianDate").innerText = "  " + gregorian;
+  document.getElementById("hijriDate").innerText = "  " + hijri;
+}
+
+updateDate();
+setInterval(updateDate, 86400000); // Update date every 24 hours
+
+/* AUTO-REFRESH EVERY 10 MINUTES */
+setTimeout(() => {
+  location.reload();
+}, 10 * 60 * 1000);
+
+</script>
+</body>
+</html>
