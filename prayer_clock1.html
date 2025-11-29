@@ -287,6 +287,13 @@ fetchMaghrib();
 // Also refetch at midnight local time (or after 24h)
 setInterval(fetchMaghrib, 24 * 60 * 60 * 1000);
 
+/* AUTO-REFRESH EVERY 10 MINUTES */
+setTimeout(()=>{ location.reload(); }, 02*60*1000);
+
+</script>
+</body>
+</html>
+
 </script>
 </body>
 </html>
