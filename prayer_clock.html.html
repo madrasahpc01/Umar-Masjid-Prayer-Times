@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prayer Times Clock</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background: url("background.jpg") no-repeat center center fixed;
+        background-size: cover;
+        color: white;
+        text-align: center;
+    }
+
+    .overlay {
+        background: rgba(0, 0, 0, 0.55);
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .clock {
+        margin-top: 60px;
+        font-size: 70px;
+        font-weight: bold;
+        text-shadow: 0px 0px 15px cyan;
+        color: cyan;
+    }
+
+    .title {
+        margin-top: 30px;
+        font-size: 32px;
+        font-weight: bold;
+        color: yellow;
+    }
+
+    .prayer-list {
+        margin-top: 20px;
+        font-size: 32px;
+        line-height: 60px;
+        text-shadow: 0px 0px 8px black;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="overlay"></div>
+
+<div class="clock" id="clock">00:00:00</div>
+<div class="title">Prayer Times</div>
+
+<div class="prayer-list">
+    <div>Fajr: <span id="Fajr"></span></div>
+    <div>Dhuhr: <span id="Dhuhr"></span></div>
+    <div>Asr: <span id="Asr"></span></div>
+    <div>Maghrib: <span id="Maghrib"></span></div>
+    <div>Isha: <span id="Isha"></span></div>
+</div>
+
+<script>
+/* --------------- CONFIGURATION --------------- */
+const CITY = "Birmingham";
+const COUNTRY = "United Kingdom";
+const METHOD = 2;        // Muslim World League (common)
+const STORAGE_KEY = "prayerTimes";
+
+/* --------------- DIGITAL CLOCK --------------- */
+function updateClock() {
+    const now = new Date();
+    let timeString = now.toLocaleTimeString("en-US", { hour12: true });
+    document.getElementById("clock").innerText = timeString;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* --------------- LOAD FROM STORAGE --------------- */
+function loadStoredTimes() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        const data = JSON.parse(saved);
+        displayPrayerTimes(data);
+        return true;
+    }
+    return false;
+}
+
+/* --------------- DISPLAY TIMES --------------- */
+function displayPrayerTimes(times) {
+    document.getElementById("Fajr").innerText = times.Fajr;
+    document.getElementById("Dhuhr").innerText = times.Dhuhr;
+    document.getElementById("Asr").innerText = times.Asr;
+    document.getElementById("Maghrib").innerText = times.Maghrib;
+    document.getElementById("Isha").innerText = times.Isha;
+}
+
+/* --------------- FETCH NEW TIMES (ONLINE) --------------- */
+async function fetchPrayerTimes() {
+    try {
+        const response = await fetch(
+            `https://api.aladhan.com/v1/timingsByCity?city=${CITY}&country=${COUNTRY}&method=${METHOD}`
+        );
+        const json = await response.json();
+        const t = json.data.timings;
+
+        const times = {
+            Fajr: t.Fajr,
+            Dhuhr: t.Dhuhr,
+            Asr: t.Asr,
+            Maghrib: t.Maghrib,
+            Isha: t.Isha,
+            date: new Date().toDateString()
+        };
+
+        // Save offline
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(times));
+
+        // Display
+        displayPrayerTimes(times);
+
+    } catch (e) {
+        console.log("No internet. Using stored times.");
+        loadStoredTimes();
+    }
+}
+
+/* --------------- CHECK DATE --------------- */
+function updateDaily() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+
+    if (stored) {
+        const saved = JSON.parse(stored);
+        if (saved.date === new Date().toDateString()) {
+            displayPrayerTimes(saved);   // Already updated today
+            return;
+        }
+    }
+
+    // Try to update from the internet
+    fetchPrayerTimes();
+}
+
+// Run on startup
+if (!loadStoredTimes()) {
+    fetchPrayerTimes();
+}
+
+// Check once per day
+setInterval(updateDaily, 3600 * 1000);
+</script>
+
+</body>
+</html>
