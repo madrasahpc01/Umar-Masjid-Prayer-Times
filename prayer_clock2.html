@@ -348,7 +348,13 @@ setTimeout(() => {
   location.reload();
 }, 10 * 60 * 1000);
 
+setInterval(() => {
+  window.scrollBy(0, 1);
+  window.scrollBy(0, -1);
+}, 30000); // every 30 seconds
+
 </script>
 </body>
 </html>
+
 
