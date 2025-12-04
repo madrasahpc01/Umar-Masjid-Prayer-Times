@@ -18,6 +18,7 @@
       background-size: cover;
       color: white;
       text-align: center;
+      overflow: hidden;
     }
     .overlay {
       background: rgba(0, 0, 0, 0.55);
@@ -87,11 +88,52 @@
     @media (max-width: 500px) {
       .prayer-block { width: 90%; }
     }
+
+    /* FULLSCREEN BUTTONS */
+    #fullscreenControls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .fs-btn {
+      background: rgba(0,0,0,0.6);
+      border: 2px solid #00ffe5;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 18px;
+      color: #00ffe5;
+      cursor: pointer;
+      box-shadow: 0 0 8px #00ffe5;
+      transition: 0.3s;
+    }
+
+    .fs-btn:hover {
+      background: rgba(0,255,200,0.3);
+      color: black;
+      box-shadow: 0 0 12px cyan;
+    }
+
+    .hide-buttons {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s;
+    }
   </style>
 </head>
 
 <body>
   <div class="overlay"></div>
+
+  <!-- FULLSCREEN BUTTONS -->
+  <div id="fullscreenControls">
+    <button id="enterFS" class="fs-btn">⛶ Full Screen</button>
+    <button id="exitFS" class="fs-btn" style="display:none;">✖ Exit Full Screen</button>
+  </div>
 
   <!-- Gregorian & Hijri Dates -->
   <div class="date-box" id="dateBox">
@@ -145,7 +187,7 @@ const prayerTimes = {
   Dhuhr: "13:00",
   Asr: "14:30",
   Isha: "19:00",
-  Khutbah: "13:00" // Friday Khutbah at 13:00
+  Khutbah: "13:00"
 };
 
 window.prayerTimesFull = Object.assign({}, prayerTimes);
@@ -168,55 +210,49 @@ function getPrayerDate(timeStr){
   return d;
 }
 
-setInterval(updateMainClock, 1000);
-updateMainClock();
-
-/* COUNTDOWN FOR FRIDAY Khutbah (WEEKLY COUNTDOWN) */
+/* FRIDAY KHUTBAH */
 function getNextFriday() {
   const now = new Date();
-  const currentDay = now.getDay();  // 0: Sunday, 1: Monday, ..., 5: Friday
-  const daysUntilFriday = (5 - currentDay + 7) % 7;  // Calculate days until the next Friday
-
-  const nextFriday = new Date(now);
-  nextFriday.setDate(now.getDate() + daysUntilFriday);  // Move to the next Friday
-  nextFriday.setHours(13, 0, 0, 0);  // Set time to 13:00
-
-  return nextFriday;
+  const day = now.getDay();
+  const diff = (5 - day + 7) % 7;
+  const f = new Date(now);
+  f.setDate(now.getDate() + diff);
+  f.setHours(13, 0, 0, 0);
+  return f;
 }
 
 function updateKhutbahCountdown() {
-  const nextFriday = getNextFriday();
   const now = new Date();
-
+  const nextFriday = getNextFriday();
   const diff = nextFriday - now;
 
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
 
-  const countdownStr = `Time remaining: ${days}d ${hours}h ${minutes}m ${seconds}s`;
-  document.getElementById("countKhutbah").innerText = countdownStr;
+  document.getElementById("countKhutbah").innerText =
+    `Time remaining: ${days}d ${hours}h ${mins}m ${secs}s`;
 }
+setInterval(updateKhutbahCountdown, 1000);
 
-setInterval(updateKhutbahCountdown, 1000); // Update every second
-
+/* COUNTDOWNS & HIGHLIGHT */
 function updateCountdowns(){
   const now = new Date();
   let closestDiff = Infinity;
   let currentPrayer = null;
 
-  for (const p of ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]) {
-    const elCount = document.getElementById("count" + p);
-    const time = window.prayerTimesFull[p];
-    if (!time) continue;
-    const pd = getPrayerDate(time);
+  for (const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha"]) {
+    const t = window.prayerTimesFull[p];
+    const pd = getPrayerDate(t);
     const diff = pd - now;
 
-    const h = Math.floor(diff / (1000 * 60 * 60));
-    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const s = Math.floor((diff % (1000 * 60)) / 1000);
-    elCount.innerText = `Time remaining: ${h}h ${m}m ${s}s`;
+    const h = Math.floor(diff/3600000);
+    const m = Math.floor((diff%3600000)/60000);
+    const s = Math.floor((diff%60000)/1000);
+
+    document.getElementById("count"+p).innerText =
+      `Time remaining: ${h}h ${m}m ${s}s`;
 
     if (diff >= 0 && diff < closestDiff) {
       closestDiff = diff;
@@ -224,137 +260,163 @@ function updateCountdowns(){
     }
   }
 
-  // Highlight current prayer
-  for (const p of ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha", "Khutbah"]) {
-    const block = document.getElementById("block" + p);
-    if (p === currentPrayer) {
-      block.classList.add("current");
-    } else {
-      block.classList.remove("current");
-    }
+  for (const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha","Khutbah"]) {
+    const block = document.getElementById("block"+p);
+    block.classList.toggle("current", p === currentPrayer);
   }
 }
 setInterval(updateCountdowns, 1000);
 
-/* ANALOG CLOCK */
+/* ANALOG CLOCKS */
 function drawClock(canvasId, timeStr) {
-  const [h, m] = timeStr.split(":").map(Number);
+  const [h,m] = timeStr.split(":").map(Number);
   const canvas = document.getElementById(canvasId);
   const ctx = canvas.getContext("2d");
-  const radius = canvas.height / 2;
-  ctx.translate(radius, radius);
+  const r = canvas.height/2;
+  ctx.translate(r,r);
 
-  function drawFace() {
+  function face() {
     ctx.beginPath();
-    ctx.arc(0, 0, radius * 0.95, 0, 2 * Math.PI);
-    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    ctx.arc(0,0,r*0.95,0,2*Math.PI);
+    ctx.fillStyle="rgba(255,255,255,0.05)";
     ctx.fill();
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 3;
+    ctx.strokeStyle="white";
+    ctx.lineWidth=3;
     ctx.stroke();
-
     ctx.beginPath();
-    ctx.arc(0, 0, radius * 0.08, 0, 2 * Math.PI);
-    ctx.fillStyle = "white";
+    ctx.arc(0,0,r*0.08,0,2*Math.PI);
     ctx.fill();
   }
 
-  function drawNumbers() {
-    ctx.font = radius * 0.18 + "px arial";
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "center";
-    for (let num = 1; num <= 12; num++) {
-      let ang = num * Math.PI / 6;
+  function nums() {
+    ctx.font=r*0.18+"px arial";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    for(let n=1;n<=12;n++){
+      let ang=n*Math.PI/6;
       ctx.rotate(ang);
-      ctx.translate(0, -radius * 0.75);
+      ctx.translate(0,-r*0.75);
       ctx.rotate(-ang);
-      ctx.fillText(num.toString(), 0, 0);
+      ctx.fillText(n.toString(),0,0);
       ctx.rotate(ang);
-      ctx.translate(0, radius * 0.75);
+      ctx.translate(0,r*0.75);
       ctx.rotate(-ang);
     }
   }
 
-  function drawHands(hour, minute) {
-    hour = hour % 12;
-    hour = (hour * Math.PI) / 6 + (minute * Math.PI) / (6 * 60);
-    drawHand(hour, radius * 0.5, 5);
-    drawHand((minute * Math.PI) / 30, radius * 0.8, 3);
+  function hands(hh,mm){
+    hh%=12;
+    hh=(hh*Math.PI)/6+(mm*Math.PI)/(6*60);
+    hand(hh,r*0.5,5);
+    hand((mm*Math.PI)/30,r*0.8,3);
   }
 
-  function drawHand(pos, length, width) {
+  function hand(pos,len,w){
     ctx.beginPath();
-    ctx.lineWidth = width;
-    ctx.lineCap = "round";
-    ctx.moveTo(0, 0);
+    ctx.lineWidth=w;
+    ctx.lineCap="round";
     ctx.rotate(pos);
-    ctx.lineTo(0, -length);
+    ctx.moveTo(0,0);
+    ctx.lineTo(0,-len);
     ctx.stroke();
     ctx.rotate(-pos);
   }
 
-  ctx.clearRect(-radius, -radius, canvas.width, canvas.height);
-  drawFace();
-  drawNumbers();
-  drawHands(h, m);
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(-r,-r,canvas.width,canvas.height);
+  face(); nums(); hands(h,m);
+  ctx.setTransform(1,0,0,1,0,0);
 }
 
-/* STATIC CLOCKS */
-for (const p of ["Fajr", "Dhuhr", "Asr", "Isha", "Khutbah"]) {
+for (const p of ["Fajr","Dhuhr","Asr","Isha","Khutbah"]) {
   const t = prayerTimes[p];
   document.getElementById(p).innerText = t;
-  drawClock("clock" + p, t);
+  drawClock("clock"+p,t);
 }
 
-/* FETCH MAGHRIB TIME */
+/* FETCH MAGHRIB */
 async function fetchMaghrib() {
   try {
-    const city = "Birmingham"; // Replace with your city name
-    const country = "United Kingdom"; // Replace with your country name
-    const method = 2; // Default calculation method for prayer times
-    const res = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=${method}`);
+    const res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Birmingham&country=United%20Kingdom&method=2");
     const data = await res.json();
-    const t = data.data.timings.Maghrib.match(/^(\d{1,2}):(\d{2})/);
-    if (t) {
-      const maghribTime = t[1].padStart(2, "0") + ":" + t[2];
-      window.prayerTimesFull.Maghrib = maghribTime;
-      document.getElementById("Maghrib").innerText = maghribTime;
-      drawClock("clockMaghrib", maghribTime);
+    const match = data.data.timings.Maghrib.match(/^(\d{1,2}):(\d{2})/);
+    if (match) {
+      const m = match[1].padStart(2,"0")+":"+match[2];
+      window.prayerTimesFull.Maghrib = m;
+      document.getElementById("Maghrib").innerText = m;
+      drawClock("clockMaghrib",m);
     }
-  } catch (e) {
-    console.warn("Maghrib fetch failed");
-  }
+  } catch(e){ console.warn("Maghrib fetch failed"); }
 }
-
-// Fetch Maghrib prayer time immediately and every 24 hours
 fetchMaghrib();
-setInterval(fetchMaghrib, 24 * 60 * 60 * 1000); // 24 hours
+setInterval(fetchMaghrib,86400000);
 
-/* SHOW GREGORIAN AND HIJRI DATES */
+/* DATES */
 function updateDate() {
-  const gregorian = moment().format("dddd, MMMM Do YYYY"); // Gregorian date
-  const hijri = moment().format("iDD iMMMM iYYYY"); // Hijri date
+  document.getElementById("gregorianDate").innerText = moment().format("dddd, MMMM Do YYYY");
+  document.getElementById("hijriDate").innerText = moment().format("iDD iMMMM iYYYY");
+}
+updateDate();
 
-  document.getElementById("gregorianDate").innerText = "  " + gregorian;
-  document.getElementById("hijriDate").innerText = "  " + hijri;
+/* AUTO REFRESH */
+setTimeout(()=>location.reload(),600000);
+
+/* SCROLL FIX */
+setInterval(()=>{ window.scrollBy(0,1); window.scrollBy(0,-1); },30000);
+
+/* -------------------------------------------
+      FULL SCREEN SYSTEM
+-------------------------------------------- */
+const enterFS = document.getElementById("enterFS");
+const exitFS  = document.getElementById("exitFS");
+const fsBox   = document.getElementById("fullscreenControls");
+
+function goFullscreen(){
+  if (document.documentElement.requestFullscreen)
+    document.documentElement.requestFullscreen();
+
+  enterFS.style.display="none";
+  exitFS.style.display="block";
+
+  setTimeout(()=> fsBox.classList.add("hide-buttons"),3000);
 }
 
-updateDate();
-setInterval(updateDate, 86400000); // Update date every 24 hours
+function exitFullscreen(){
+  if (document.exitFullscreen) document.exitFullscreen();
+  fsBox.classList.remove("hide-buttons");
+  exitFS.style.display="none";
+  enterFS.style.display="block";
+}
 
-/* AUTO-REFRESH EVERY 10 MINUTES */
-setTimeout(() => {
-  location.reload();
-}, 10 * 60 * 1000);
+enterFS.onclick = goFullscreen;
+exitFS.onclick  = exitFullscreen;
 
-setInterval(() => {
-  window.scrollBy(0, 1);
-  window.scrollBy(0, -1);
-}, 30000); // every 30 seconds
+/* Auto re-enter fullscreen */
+document.addEventListener("fullscreenchange",()=>{
+  if (!document.fullscreenElement){
+    fsBox.classList.remove("hide-buttons");
+    exitFS.style.display="none";
+    enterFS.style.display="block";
+
+    setTimeout(()=>{
+      if (!document.fullscreenElement) goFullscreen();
+    },2000);
+  }
+});
+
+/* F11 style keyboard */
+document.addEventListener("keydown",(e)=>{
+  if (e.key==="F11"){
+    e.preventDefault();
+    !document.fullscreenElement ? goFullscreen() : exitFullscreen();
+  }
+});
+
+/* Auto enter fullscreen after X seconds */
+setTimeout(()=>{
+  if (!document.fullscreenElement) goFullscreen();
+},10000);
 
 </script>
+
 </body>
 </html>
-
-
