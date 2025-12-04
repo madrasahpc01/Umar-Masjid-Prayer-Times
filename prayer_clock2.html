@@ -82,57 +82,84 @@
       padding: 10px;
       border-radius: 5px;
     }
-    @media (max-width: 800px) {
-      .prayer-block { width: 45%; }
-    }
-    @media (max-width: 500px) {
-      .prayer-block { width: 90%; }
-    }
 
-    /* FULLSCREEN BUTTONS */
-    #fullscreenControls {
+    /* FULLSCREEN TOGGLE ICON */
+    #fsToggle {
       position: fixed;
       top: 20px;
-      right: 20px;
+      right: 25px;
       z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .fs-btn {
-      background: rgba(0,0,0,0.6);
-      border: 2px solid #00ffe5;
-      border-radius: 8px;
-      padding: 10px 18px;
-      font-size: 18px;
-      color: #00ffe5;
       cursor: pointer;
-      box-shadow: 0 0 8px #00ffe5;
-      transition: 0.3s;
+      background: rgba(0,0,0,0.45);
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: 2px solid #00ffe5;
+      box-shadow: 0 0 10px #00ffe5;
+      transition: 0.4s;
     }
 
-    .fs-btn:hover {
-      background: rgba(0,255,200,0.3);
-      color: black;
-      box-shadow: 0 0 12px cyan;
+    #fsToggle:hover {
+      background: rgba(0,255,200,0.25);
+      box-shadow: 0 0 18px cyan;
     }
 
-    .hide-buttons {
+    #fsIcon {
+      font-size: 28px;
+      color: #00ffe5;
+    }
+
+    .fs-hidden {
       opacity: 0;
       pointer-events: none;
       transition: opacity 1s;
     }
+
+    /* ANNOUNCEMENT BAR */
+    #announcementBar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: rgba(0,0,0,0.65);
+      border-top: 2px solid #00ffe5;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      z-index: 9998;
+      box-shadow: 0 -2px 12px #00ffe5;
+    }
+
+    #announcementSlider {
+      position: absolute;
+      white-space: nowrap;
+      font-size: 22px;
+      color: #00ffe5;
+      padding-left: 100%;
+      animation: slideAnnouncement 15s linear infinite;
+      text-shadow: 0 0 8px #00ffe5;
+    }
+
+    @keyframes slideAnnouncement {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-100%); }
+    }
+
   </style>
 </head>
 
 <body>
+
   <div class="overlay"></div>
 
-  <!-- FULLSCREEN BUTTONS -->
-  <div id="fullscreenControls">
-    <button id="enterFS" class="fs-btn">⛶ Full Screen</button>
-    <button id="exitFS" class="fs-btn" style="display:none;">✖ Exit Full Screen</button>
+  <!-- FULLSCREEN TOGGLE ICON -->
+  <div id="fsToggle">
+    <span id="fsIcon">⛶</span>
+  </div>
+
+  <!-- ANNOUNCEMENTS BAR -->
+  <div id="announcementBar">
+    <div id="announcementSlider"></div>
   </div>
 
   <!-- Gregorian & Hijri Dates -->
@@ -181,6 +208,7 @@
   </div>
 
 <script>
+
 /* STATIC PRAYER TIMES */
 const prayerTimes = {
   Fajr: "07:00",
@@ -190,34 +218,33 @@ const prayerTimes = {
   Khutbah: "13:00"
 };
 
-window.prayerTimesFull = Object.assign({}, prayerTimes);
+window.prayerTimesFull = { ...prayerTimes };
 
 /* MAIN CLOCK */
-function updateMainClock(){
+function updateMainClock() {
   const now = new Date();
   document.getElementById("mainClock").innerText =
-    now.toLocaleTimeString("en-US",{ hour12:true });
+    now.toLocaleTimeString("en-US", { hour12: true });
 }
 setInterval(updateMainClock, 1000);
 updateMainClock();
 
-/* COUNTDOWN & HIGHLIGHT */
+/* GET PRAYER DATE */
 function getPrayerDate(timeStr){
-  const [h, m] = timeStr.split(":").map(Number);
+  const [h,m] = timeStr.split(":").map(Number);
   const d = new Date();
-  d.setHours(h, m, 0, 0);
-  if (d <= new Date()) d.setDate(d.getDate() + 1);
+  d.setHours(h,m,0,0);
+  if (d <= new Date()) d.setDate(d.getDate()+1);
   return d;
 }
 
 /* FRIDAY KHUTBAH */
 function getNextFriday() {
   const now = new Date();
-  const day = now.getDay();
-  const diff = (5 - day + 7) % 7;
+  const diff = (5 - now.getDay() + 7) % 7;
   const f = new Date(now);
   f.setDate(now.getDate() + diff);
-  f.setHours(13, 0, 0, 0);
+  f.setHours(13,0,0,0);
   return f;
 }
 
@@ -226,7 +253,7 @@ function updateKhutbahCountdown() {
   const nextFriday = getNextFriday();
   const diff = nextFriday - now;
 
-  const days = Math.floor(diff / (1000*60*60*24));
+  const days = Math.floor(diff / 86400000);
   const hours = Math.floor((diff % 86400000) / 3600000);
   const mins = Math.floor((diff % 3600000) / 60000);
   const secs = Math.floor((diff % 60000) / 1000);
@@ -236,11 +263,11 @@ function updateKhutbahCountdown() {
 }
 setInterval(updateKhutbahCountdown, 1000);
 
-/* COUNTDOWNS & HIGHLIGHT */
+/* COUNTDOWNS */
 function updateCountdowns(){
   const now = new Date();
-  let closestDiff = Infinity;
-  let currentPrayer = null;
+  let closest = Infinity;
+  let active = null;
 
   for (const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha"]) {
     const t = window.prayerTimesFull[p];
@@ -254,28 +281,28 @@ function updateCountdowns(){
     document.getElementById("count"+p).innerText =
       `Time remaining: ${h}h ${m}m ${s}s`;
 
-    if (diff >= 0 && diff < closestDiff) {
-      closestDiff = diff;
-      currentPrayer = p;
+    if (diff >=0 && diff < closest) {
+      closest = diff;
+      active = p;
     }
   }
 
   for (const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha","Khutbah"]) {
     const block = document.getElementById("block"+p);
-    block.classList.toggle("current", p === currentPrayer);
+    block.classList.toggle("current", p === active);
   }
 }
-setInterval(updateCountdowns, 1000);
+setInterval(updateCountdowns,1000);
 
-/* ANALOG CLOCKS */
-function drawClock(canvasId, timeStr) {
+/* ANALOG CLOCK */
+function drawClock(canvasId, timeStr){
   const [h,m] = timeStr.split(":").map(Number);
   const canvas = document.getElementById(canvasId);
   const ctx = canvas.getContext("2d");
   const r = canvas.height/2;
   ctx.translate(r,r);
 
-  function face() {
+  function face(){
     ctx.beginPath();
     ctx.arc(0,0,r*0.95,0,2*Math.PI);
     ctx.fillStyle="rgba(255,255,255,0.05)";
@@ -288,7 +315,7 @@ function drawClock(canvasId, timeStr) {
     ctx.fill();
   }
 
-  function nums() {
+  function nums(){
     ctx.font=r*0.18+"px arial";
     ctx.textAlign="center";
     ctx.textBaseline="middle";
@@ -306,7 +333,7 @@ function drawClock(canvasId, timeStr) {
 
   function hands(hh,mm){
     hh%=12;
-    hh=(hh*Math.PI)/6+(mm*Math.PI)/(6*60);
+    hh = hh*Math.PI/6 + mm*Math.PI/(6*60);
     hand(hh,r*0.5,5);
     hand((mm*Math.PI)/30,r*0.8,3);
   }
@@ -327,91 +354,112 @@ function drawClock(canvasId, timeStr) {
   ctx.setTransform(1,0,0,1,0,0);
 }
 
-for (const p of ["Fajr","Dhuhr","Asr","Isha","Khutbah"]) {
+for(const p of ["Fajr","Dhuhr","Asr","Isha","Khutbah"]){
   const t = prayerTimes[p];
   document.getElementById(p).innerText = t;
   drawClock("clock"+p,t);
 }
 
-/* FETCH MAGHRIB */
-async function fetchMaghrib() {
+/* MAGHRIB FETCH */
+async function fetchMaghrib(){
   try {
     const res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Birmingham&country=United%20Kingdom&method=2");
     const data = await res.json();
     const match = data.data.timings.Maghrib.match(/^(\d{1,2}):(\d{2})/);
-    if (match) {
+    if(match){
       const m = match[1].padStart(2,"0")+":"+match[2];
       window.prayerTimesFull.Maghrib = m;
       document.getElementById("Maghrib").innerText = m;
       drawClock("clockMaghrib",m);
     }
-  } catch(e){ console.warn("Maghrib fetch failed"); }
+  } catch(e){}
 }
 fetchMaghrib();
 setInterval(fetchMaghrib,86400000);
 
-/* DATES */
-function updateDate() {
-  document.getElementById("gregorianDate").innerText = moment().format("dddd, MMMM Do YYYY");
-  document.getElementById("hijriDate").innerText = moment().format("iDD iMMMM iYYYY");
+/* DATE UPDATE */
+function updateDate(){
+  document.getElementById("gregorianDate").innerText =
+    moment().format("dddd, MMMM Do YYYY");
+  document.getElementById("hijriDate").innerText =
+    moment().format("iDD iMMMM iYYYY");
 }
 updateDate();
 
-/* -------------------------------------------
-      FULL SCREEN SYSTEM
--------------------------------------------- */
-const enterFS = document.getElementById("enterFS");
-const exitFS  = document.getElementById("exitFS");
-const fsBox   = document.getElementById("fullscreenControls");
+/* AUTO REFRESH */
+setTimeout(()=>location.reload(),600000);
+
+/* FULLSCREEN ICON SYSTEM */
+const fsToggle = document.getElementById("fsToggle");
+const fsIcon = document.getElementById("fsIcon");
 
 function goFullscreen(){
-  if (document.documentElement.requestFullscreen)
+  if(document.documentElement.requestFullscreen)
     document.documentElement.requestFullscreen();
 
-  enterFS.style.display="none";
-  exitFS.style.display="block";
-
-  setTimeout(()=> fsBox.classList.add("hide-buttons"),3000);
+  fsIcon.textContent = "✖";
+  setTimeout(()=>fsToggle.classList.add("fs-hidden"),3000);
 }
 
 function exitFullscreen(){
-  if (document.exitFullscreen) document.exitFullscreen();
-  fsBox.classList.remove("hide-buttons");
-  exitFS.style.display="none";
-  enterFS.style.display="block";
+  if(document.exitFullscreen) document.exitFullscreen();
+  fsToggle.classList.remove("fs-hidden");
+  fsIcon.textContent = "⛶";
 }
 
-enterFS.onclick = goFullscreen;
-exitFS.onclick  = exitFullscreen;
+fsToggle.onclick = () => {
+  !document.fullscreenElement ? goFullscreen() : exitFullscreen();
+};
 
-/* Auto re-enter fullscreen */
 document.addEventListener("fullscreenchange",()=>{
-  if (!document.fullscreenElement){
-    fsBox.classList.remove("hide-buttons");
-    exitFS.style.display="none";
-    enterFS.style.display="block";
-
+  if(!document.fullscreenElement){
+    fsToggle.classList.remove("fs-hidden");
+    fsIcon.textContent="⛶";
     setTimeout(()=>{
-      if (!document.fullscreenElement) goFullscreen();
+      if(!document.fullscreenElement) goFullscreen();
     },2000);
   }
 });
 
-/* F11 style keyboard */
 document.addEventListener("keydown",(e)=>{
-  if (e.key==="F11"){
+  if(e.key==="F11"){
     e.preventDefault();
     !document.fullscreenElement ? goFullscreen() : exitFullscreen();
   }
 });
 
-/* Auto enter fullscreen after X seconds */
 setTimeout(()=>{
-  if (!document.fullscreenElement) goFullscreen();
+  if(!document.fullscreenElement) goFullscreen();
 },10000);
 
-</script>
+/* ANNOUNCEMENTS SYSTEM */
+const announcements = [
+  "MADRASAH SPORTS WEEK IS ON",
+  "Family Circle on Coming Sunday Afternoon after Zuhr",
+  "Mini Muslim on Sunday Morning from 11:00 AM to 12:30 PM",
+  "Weekend Madrasah on Saturday Morning from 11:00 AM to 01:00 PM",
+  "Normal Madrasah Mon to Fri from 5 PM to 06:30 PM",
+  "Hifz class Mon to Fri from 5PM to 7PM",
+  "Adults Urdu Quran Class on Mon & Fri from 07:20 to 08:30 PM",
+  "Adults English Quran Class on Wed from 07:20 to 08:30 PM"
+];
 
+let annIndex = 0;
+
+function updateAnnouncement(){
+  const slider = document.getElementById("announcementSlider");
+  slider.innerText = announcements[annIndex];
+
+  slider.style.animation = "none";
+  void slider.offsetWidth;
+  slider.style.animation = null;
+
+  annIndex = (annIndex + 1) % announcements.length;
+}
+
+setInterval(updateAnnouncement,15000);
+updateAnnouncement();
+
+</script>
 </body>
 </html>
-
