@@ -133,11 +133,12 @@
     #announcementSlider {
       position: absolute;
       white-space: nowrap;
-      font-size: 22px;
-      color: #00ffe5;
+      font-size: 35px;
+      font-weight: bold
+      color: #0000FF;
       padding-left: 100%;
       animation: slideAnnouncement 15s linear infinite;
-      text-shadow: 0 0 8px #00ffe5;
+      text-shadow: 0 0 8px #0000FF;
     }
 
     @keyframes slideAnnouncement {
@@ -386,9 +387,6 @@ function updateDate(){
 }
 updateDate();
 
-/* AUTO REFRESH */
-setTimeout(()=>location.reload(),600000);
-
 /* FULLSCREEN ICON SYSTEM */
 const fsToggle = document.getElementById("fsToggle");
 const fsIcon = document.getElementById("fsIcon");
@@ -463,4 +461,5 @@ updateAnnouncement();
 </script>
 </body>
 </html>
+
 
