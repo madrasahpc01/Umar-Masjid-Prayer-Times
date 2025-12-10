@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prayer Times Display</title>
+
+  <!-- Include Moment.js & Hijri -->
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment-hijri@2.1.0/moment-hijri.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #000 url("background.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .overlay {
+      background: rgba(0, 0, 0, 0.55);
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+
+    .clock-main {
+      margin-top: 30px;
+      font-size: 60px;
+      font-weight: bold;
+      text-shadow: 0px 0px 15px cyan;
+    }
+
+    .title {
+      font-size: 40px;
+      margin-top: 15px;
+      font-weight: bold;
+      color: yellow;
+    }
+
+    .prayer-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .prayer-block {
+      width: 30%;
+      min-width: 220px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 10px;
+      padding: 15px;
+      margin: 10px;
+      text-shadow: 0px 0px 8px black;
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+
+    .prayer-block.current {
+      background: rgba(50, 100, 200, 0.6);
+      box-shadow: 0 0 15px cyan;
+    }
+
+    .prayer-title {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .countdown {
+      font-size: 20px;
+      margin-top: 8px;
+      color: #00ffea;
+    }
+
+    canvas {
+      margin-top: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+
+    .date-box {
+      position: absolute;
+      top: 55px;
+      left: 85px;
+      color: green;
+      font-size: 18px;
+      font-weight: bold;
+      border: 2px solid #00ffe5;
+      box-shadow: 0 0 10px #00ffe5;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    /* FULLSCREEN ICON */
+    #fsToggle {
+      position: fixed;
+      top: 20px;
+      right: 25px;
+      z-index: 9999;
+      cursor: pointer;
+      background: rgba(0,0,0,0.45);
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: 2px solid #00ffe5;
+      box-shadow: 0 0 10px #00ffe5;
+      transition: 0.4s;
+    }
+
+    #fsToggle:hover {
+      background: rgba(0,255,200,0.25);
+      box-shadow: 0 0 18px cyan;
+    }
+
+    #fsIcon {
+      font-size: 28px;
+      color: #00ffe5;
+    }
+
+    .fs-hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s;
+    }
+
+    /* WEATHER WIDGET */
+    #weatherBox {
+      position: fixed;
+      top: 55px;
+      right: 85px;
+      background: rgba(0,0,0,0.5);
+      padding: 10px 15px;
+      border-radius: 10px;
+      border: 2px solid #00ffe5;
+      box-shadow: 0 0 10px #00ffe5;
+      z-index: 9998;
+      font-size: 20px;
+      font-weight: bold;
+      color: green;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #weatherIcon {
+      width: 40px;
+      height: 40px;
+    }
+
+    /* ANNOUNCEMENT BAR */
+    #announcementBar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: rgba(0,0,0,0.65);
+      border-top: 2px solid #00ffe5;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      z-index: 9998;
+      box-shadow: 0 -2px 12px #00ffe5;
+    }
+
+    #announcementSlider {
+      position: absolute;
+      white-space: nowrap;
+      font-size: 22px;
+      color: #00ffe5;
+      padding-left: 100%;
+      animation: slideAnnouncement 15s linear infinite;
+      text-shadow: 0 0 8px #00ffe5;
+    }
+
+    @keyframes slideAnnouncement {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-100%); }
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="overlay"></div>
+
+<!-- FULLSCREEN ICON -->
+<div id="fsToggle">
+  <span id="fsIcon">⛶</span>
+</div>
+
+<!-- WEATHER WIDGET -->
+<div id="weatherBox">
+  <img id="weatherIcon" src="" alt="">
+  <span id="weatherText">Loading...</span>
+</div>
+
+<!-- ANNOUNCEMENT BAR -->
+<div id="announcementBar">
+  <div id="announcementSlider"></div>
+</div>
+
+<!-- Dates -->
+<div class="date-box" id="dateBox">
+  <div id="gregorianDate"></div>
+  <div id="hijriDate"></div>
+</div>
+
+<div class="clock-main" id="mainClock">00:00:00</div>
+<div class="title">UMAR MASJID PRAYER TIMES</div>
+
+<!-- PRAYER BLOCKS -->
+<div class="prayer-row">
+  <div class="prayer-block" id="blockFajr">
+    <div class="prayer-title">Fajr: <span id="Fajr"></span></div>
+    <canvas id="clockFajr" width="150" height="150"></canvas>
+    <div class="countdown" id="countFajr"></div>
+  </div>
+
+  <div class="prayer-block" id="blockDhuhr">
+    <div class="prayer-title">Dhuhr: <span id="Dhuhr"></span></div>
+    <canvas id="clockDhuhr" width="150" height="150"></canvas>
+    <div class="countdown" id="countDhuhr"></div>
+  </div>
+
+  <div class="prayer-block" id="blockAsr">
+    <div class="prayer-title">Asr: <span id="Asr"></span></div>
+    <canvas id="clockAsr" width="150" height="150"></canvas>
+    <div class="countdown" id="countAsr"></div>
+  </div>
+</div>
+
+<div class="prayer-row">
+  <div class="prayer-block" id="blockMaghrib">
+    <div class="prayer-title">Maghrib: <span id="Maghrib"></span></div>
+    <canvas id="clockMaghrib" width="150" height="150"></canvas>
+    <div class="countdown" id="countMaghrib"></div>
+  </div>
+
+  <div class="prayer-block" id="blockIsha">
+    <div class="prayer-title">Isha: <span id="Isha"></span></div>
+    <canvas id="clockIsha" width="150" height="150"></canvas>
+    <div class="countdown" id="countIsha"></div>
+  </div>
+
+  <div class="prayer-block" id="blockKhutbah">
+    <div class="prayer-title">Friday Khutbah: <span id="Khutbah"></span></div>
+    <canvas id="clockKhutbah" width="150" height="150"></canvas>
+    <div class="countdown" id="countKhutbah"></div>
+  </div>
+</div>
+
+<script>
+
+/* --- WEATHER WIDGET --- */
+async function loadWeather() {
+  const apiKey = "a088da7c2796f960d49d5e45931762b9";
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=Birmingham,UK&units=metric&appid=${apiKey}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const temp = Math.round(data.main.temp);
+    const condition = data.weather[0].description;
+    const icon = data.weather[0].icon;
+
+    document.getElementById("weatherText").innerText =
+      `${temp}°C | ${condition}`;
+    
+    document.getElementById("weatherIcon").src =
+      `https://openweathermap.org/img/wn/${icon}@2x.png`;
+
+  } catch (err) {
+    document.getElementById("weatherText").innerText = "Weather unavailable";
+  }
+}
+
+loadWeather();
+setInterval(loadWeather, 300000); // Update every 5 minutes
+
+
+/* --- STATIC PRAYER TIMES --- */
+const prayerTimes = {
+  Fajr: "07:00",
+  Dhuhr: "13:00",
+  Asr: "14:30",
+  Isha: "19:00",
+  Khutbah: "13:00"
+};
+
+window.prayerTimesFull = { ...prayerTimes };
+
+/* MAIN CLOCK */
+function updateMainClock() {
+  const now = new Date();
+  document.getElementById("mainClock").innerText =
+    now.toLocaleTimeString("en-US", { hour12: true });
+}
+setInterval(updateMainClock, 1000);
+updateMainClock();
+
+/* GET PRAYER DATE */
+function getPrayerDate(timeStr){
+  const [h,m] = timeStr.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h,m,0,0);
+  if (d <= new Date()) d.setDate(d.getDate()+1);
+  return d;
+}
+
+/* FRIDAY KHUTBAH */
+function getNextFriday() {
+  const now = new Date();
+  const diff = (5 - now.getDay() + 7) % 7;
+  const f = new Date(now);
+  f.setDate(now.getDate() + diff);
+  f.setHours(13,0,0,0);
+  return f;
+}
+
+function updateKhutbahCountdown() {
+  const now = new Date();
+  const nextFriday = getNextFriday();
+  const diff = nextFriday - now;
+
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+
+  document.getElementById("countKhutbah").innerText =
+    `Time remaining: ${days}d ${hours}h ${mins}m ${secs}s`;
+}
+setInterval(updateKhutbahCountdown, 1000);
+
+/* COUNTDOWNS */
+function updateCountdowns(){
+  const now = new Date();
+  let closest = Infinity;
+  let active = null;
+
+  for (const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha"]) {
+    const t = window.prayerTimesFull[p];
+    const pd = getPrayerDate(t);
+    const diff = pd - now;
+
+    const h = Math.floor(diff/3600000);
+    const m = Math.floor((diff%3600000)/60000);
+    const s = Math.floor((diff%60000)/1000);
+
+    document.getElementById("count"+p).innerText =
+      `Time remaining: ${h}h ${m}m ${s}s`;
+
+    if (diff >=0 && diff < closest) {
+      closest = diff;
+      active = p;
+    }
+  }
+
+  for (const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha","Khutbah"]) {
+    const block = document.getElementById("block"+p);
+    block.classList.toggle("current", p === active);
+  }
+}
+setInterval(updateCountdowns,1000);
+
+/* ANALOG CLOCK DRAWER */
+function drawClock(canvasId, timeStr){
+  const [h,m] = timeStr.split(":").map(Number);
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  const r = canvas.height/2;
+  ctx.translate(r,r);
+
+  function face(){ 
+    // Outer circle
+    ctx.beginPath();
+    ctx.arc(0,0,r*0.95,0,2*Math.PI);
+    ctx.fillStyle="rgba(255,255,255,0.05)";
+    ctx.fill();
+    ctx.strokeStyle="red";
+    ctx.lineWidth=3;
+    ctx.stroke();
+
+    // Center hub
+    ctx.beginPath();
+    ctx.arc(0,0,r*0.08,0,2*Math.PI);
+    ctx.fill();
+
+    // --- ADD NUMBERS HERE ---
+    ctx.fillStyle = "red";                   // number color
+    ctx.font = `${r*0.2}px Arial`;           // size depends on clock radius
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    for (let n = 1; n <= 12; n++) {
+        // convert number to angle (12 at top)
+        let angle = (n * Math.PI / 6) - Math.PI / 2;
+        let x = Math.cos(angle) * r * 0.75;  // distance from center
+        let y = Math.sin(angle) * r * 0.75;
+        ctx.fillText(n.toString(), x, y);
+    }
+
+  }
+
+  function nums(){
+    ctx.font=r*0.18+"px arial";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    for(let n=1;n<=12;n++){
+      let ang=n*Math.PI/6;
+      ctx.rotate(ang);
+      ctx.translate(0,-r*0.75);
+      ctx.rotate(-ang);
+      ctx.fillText(n.toString(),0,0);
+      ctx.rotate(ang);
+      ctx.translate(0,r*0.75);
+      ctx.rotate(-ang);
+    }
+  }
+
+  function hands(hh,mm){
+    hh%=12;
+    hh = hh*Math.PI/6 + mm*Math.PI/(6*60);
+    hand(hh,r*0.5,5);
+    hand((mm*Math.PI)/30,r*0.8,3);
+  }
+
+  function hand(pos,len,w){
+    ctx.beginPath();
+    ctx.lineWidth=w;
+    ctx.lineCap="round";
+    ctx.rotate(pos);
+    ctx.moveTo(0,0);
+    ctx.lineTo(0,-len);
+    ctx.stroke();
+    ctx.rotate(-pos);
+  }
+
+  ctx.clearRect(-r,-r,canvas.width,canvas.height);
+  face(); nums(); hands(h,m);
+  ctx.setTransform(1,0,0,1,0,0);
+}
+
+/* Draw initial clocks */
+for(const p of ["Fajr","Dhuhr","Asr","Isha","Khutbah"]){
+  const t = prayerTimes[p];
+  document.getElementById(p).innerText = t;
+  drawClock("clock"+p,t);
+}
+
+/* MAGHRIB FETCH */
+async function fetchMaghrib(){
+  try {
+    const res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Birmingham&country=United%20Kingdom&method=2");
+    const data = await res.json();
+    const match = data.data.timings.Maghrib.match(/^(\d{1,2}):(\d{2})/);
+    if(match){
+      const m = match[1].padStart(2,"0")+":"+match[2];
+      window.prayerTimesFull.Maghrib = m;
+      document.getElementById("Maghrib").innerText = m;
+      drawClock("clockMaghrib",m);
+    }
+  } catch(e){}
+}
+fetchMaghrib();
+setInterval(fetchMaghrib,86400000);
+
+/* DATE UPDATE */
+function updateDate(){
+  document.getElementById("gregorianDate").innerText =
+    moment().format("dddd, MMMM Do YYYY");
+  document.getElementById("hijriDate").innerText =
+    moment().format("iDD iMMMM iYYYY");
+}
+updateDate();
+
+/* FULLSCREEN ICON */
+const fsToggle = document.getElementById("fsToggle");
+const fsIcon = document.getElementById("fsIcon");
+
+function goFullscreen(){
+  if(document.documentElement.requestFullscreen)
+    document.documentElement.requestFullscreen();
+
+  fsIcon.textContent = "✖";
+  setTimeout(()=>fsToggle.classList.add("fs-hidden"),3000);
+}
+
+function exitFullscreen(){
+  if(document.exitFullscreen) document.exitFullscreen();
+  fsToggle.classList.remove("fs-hidden");
+  fsIcon.textContent = "⛶";
+}
+
+fsToggle.onclick = () => {
+  !document.fullscreenElement ? goFullscreen() : exitFullscreen();
+};
+
+document.addEventListener("fullscreenchange",()=>{
+  if(!document.fullscreenElement){
+    fsToggle.classList.remove("fs-hidden");
+    fsIcon.textContent="⛶";
+    setTimeout(()=>{
+      if(!document.fullscreenElement) goFullscreen();
+    },2000);
+  }
+});
+
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="F11"){
+    e.preventDefault();
+    !document.fullscreenElement ? goFullscreen() : exitFullscreen();
+  }
+});
+
+setTimeout(()=>{
+  if(!document.fullscreenElement) goFullscreen();
+},10000);
+
+/* ANNOUNCEMENTS SYSTEM */
+const announcements = [
+  "Madrasah Sports Week",
+  "Family Circle on Sunday Afternoon",
+  "Mini Muslim on Sunday Morning",
+  "Weekend Madrasah on Saturday Morning",
+  "Normal Madrasah Mon to Fri from 5 PM to 06:30 PM",
+  "Hifz class Mon to Fri from 5PM to 7PM",
+  "Adults Urdu Quran Class on Mon & Fri from 07:20 to 08:30 PM",
+  "Adults English Quran Class on Wed from 07:20 to 08:30 PM"
+];
+
+let annIndex = 0;
+
+function updateAnnouncement(){
+  const slider = document.getElementById("announcementSlider");
+  slider.innerText = announcements[annIndex];
+
+  slider.style.animation = "none";
+  void slider.offsetWidth;
+  slider.style.animation = null;
+
+  annIndex = (annIndex + 1) % announcements.length;
+}
+
+setInterval(updateAnnouncement,15000);
+updateAnnouncement();
+
+</script>
+</body>
+</html>
