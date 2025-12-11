@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prayer Times Display</title>
 
-  <!-- Include Moment.js & Hijri -->
+  <!-- Include Moment.js & Moment Hijri -->
   <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/moment-hijri@2.1.0/moment-hijri.min.js"></script>
 
@@ -20,35 +20,30 @@
       text-align: center;
       overflow: hidden;
     }
-
     .overlay {
       background: rgba(0, 0, 0, 0.55);
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
     }
-
     .clock-main {
       margin-top: 30px;
       font-size: 60px;
       font-weight: bold;
       text-shadow: 0px 0px 15px cyan;
     }
-
     .title {
       font-size: 40px;
       margin-top: 15px;
       font-weight: bold;
       color: yellow;
     }
-
     .prayer-row {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
       margin-top: 20px;
     }
-
     .prayer-block {
       width: 30%;
       min-width: 220px;
@@ -59,29 +54,24 @@
       text-shadow: 0px 0px 8px black;
       transition: background 0.5s, box-shadow 0.5s;
     }
-
     .prayer-block.current {
       background: rgba(50, 100, 200, 0.6);
       box-shadow: 0 0 15px cyan;
     }
-
     .prayer-title {
-      font-size: 28px;
+      font-size: 40px;
       font-weight: bold;
     }
-
     .countdown {
-      font-size: 20px;
+      font-size: 33px;
       margin-top: 8px;
       color: #00ffea;
     }
-
     canvas {
       margin-top: 10px;
       background: rgba(255,255,255,0.1);
       border-radius: 50%;
     }
-
     .date-box {
       position: absolute;
       top: 55px;
@@ -96,7 +86,7 @@
       border-radius: 5px;
     }
 
-    /* FULLSCREEN ICON */
+    /* FULLSCREEN TOGGLE ICON */
     #fsToggle {
       position: fixed;
       top: 20px;
@@ -170,11 +160,12 @@
     #announcementSlider {
       position: absolute;
       white-space: nowrap;
-      font-size: 22px;
-      color: #00ffe5;
+      font-size: 50px;
+      font-weight: bold
+      color: #0000FF;
       padding-left: 100%;
       animation: slideAnnouncement 15s linear infinite;
-      text-shadow: 0 0 8px #00ffe5;
+      text-shadow: 0 0 8px #0000FF;
     }
 
     @keyframes slideAnnouncement {
@@ -187,12 +178,12 @@
 
 <body>
 
-<div class="overlay"></div>
+  <div class="overlay"></div>
 
-<!-- FULLSCREEN ICON -->
-<div id="fsToggle">
-  <span id="fsIcon">⛶</span>
-</div>
+  <!-- FULLSCREEN TOGGLE ICON -->
+  <div id="fsToggle">
+    <span id="fsIcon">⛶</span>
+  </div>
 
 <!-- WEATHER WIDGET -->
 <div id="weatherBox">
@@ -200,60 +191,55 @@
   <span id="weatherText">Loading...</span>
 </div>
 
-<!-- ANNOUNCEMENT BAR -->
-<div id="announcementBar">
-  <div id="announcementSlider"></div>
-</div>
-
-<!-- Dates -->
-<div class="date-box" id="dateBox">
-  <div id="gregorianDate"></div>
-  <div id="hijriDate"></div>
-</div>
-
-<div class="clock-main" id="mainClock">00:00:00</div>
-<div class="title">UMAR MASJID PRAYER TIMES</div>
-
-<!-- PRAYER BLOCKS -->
-<div class="prayer-row">
-  <div class="prayer-block" id="blockFajr">
-    <div class="prayer-title">Fajr: <span id="Fajr"></span></div>
-    <canvas id="clockFajr" width="150" height="150"></canvas>
-    <div class="countdown" id="countFajr"></div>
+  <!-- ANNOUNCEMENTS BAR -->
+  <div id="announcementBar">
+    <div id="announcementSlider"></div>
   </div>
 
-  <div class="prayer-block" id="blockDhuhr">
-    <div class="prayer-title">Dhuhr: <span id="Dhuhr"></span></div>
-    <canvas id="clockDhuhr" width="150" height="150"></canvas>
-    <div class="countdown" id="countDhuhr"></div>
+  <!-- Gregorian & Hijri Dates -->
+  <div class="date-box" id="dateBox">
+    <div id="gregorianDate"></div>
+    <div id="hijriDate"></div>
   </div>
 
-  <div class="prayer-block" id="blockAsr">
-    <div class="prayer-title">Asr: <span id="Asr"></span></div>
-    <canvas id="clockAsr" width="150" height="150"></canvas>
-    <div class="countdown" id="countAsr"></div>
-  </div>
-</div>
+  <div class="clock-main" id="mainClock">00:00:00</div>
+  <div class="title">UMAR MASJID PRAYER TIMES</div>
 
-<div class="prayer-row">
-  <div class="prayer-block" id="blockMaghrib">
-    <div class="prayer-title">Maghrib: <span id="Maghrib"></span></div>
-    <canvas id="clockMaghrib" width="150" height="150"></canvas>
-    <div class="countdown" id="countMaghrib"></div>
+  <div class="prayer-row">
+    <div class="prayer-block" id="blockFajr">
+      <div class="prayer-title">Fajr: <span id="Fajr"></span></div>
+      <canvas id="clockFajr" width="180" height="180"></canvas>
+      <div class="countdown" id="countFajr"></div>
+    </div>
+    <div class="prayer-block" id="blockDhuhr">
+      <div class="prayer-title">Dhuhr: <span id="Dhuhr"></span></div>
+      <canvas id="clockDhuhr" width="180" height="180"></canvas>
+      <div class="countdown" id="countDhuhr"></div>
+    </div>
+    <div class="prayer-block" id="blockAsr">
+      <div class="prayer-title">Asr: <span id="Asr"></span></div>
+      <canvas id="clockAsr" width="180" height="180"></canvas>
+      <div class="countdown" id="countAsr"></div>
+    </div>
   </div>
 
-  <div class="prayer-block" id="blockIsha">
-    <div class="prayer-title">Isha: <span id="Isha"></span></div>
-    <canvas id="clockIsha" width="150" height="150"></canvas>
-    <div class="countdown" id="countIsha"></div>
+  <div class="prayer-row">
+    <div class="prayer-block" id="blockMaghrib">
+      <div class="prayer-title">Maghrib: <span id="Maghrib"></span></div>
+      <canvas id="clockMaghrib" width="180" height="180"></canvas>
+      <div class="countdown" id="countMaghrib"></div>
+    </div>
+    <div class="prayer-block" id="blockIsha">
+      <div class="prayer-title">Isha: <span id="Isha"></span></div>
+      <canvas id="clockIsha" width="180" height="180"></canvas>
+      <div class="countdown" id="countIsha"></div>
+    </div>
+    <div class="prayer-block" id="blockKhutbah">
+      <div class="prayer-title">Friday Khutbah: <span id="Khutbah"></span></div>
+      <canvas id="clockKhutbah" width="180" height="180"></canvas>
+      <div class="countdown" id="countKhutbah"></div>
+    </div>
   </div>
-
-  <div class="prayer-block" id="blockKhutbah">
-    <div class="prayer-title">Friday Khutbah: <span id="Khutbah"></span></div>
-    <canvas id="clockKhutbah" width="150" height="150"></canvas>
-    <div class="countdown" id="countKhutbah"></div>
-  </div>
-</div>
 
 <script>
 
@@ -285,7 +271,7 @@ loadWeather();
 setInterval(loadWeather, 300000); // Update every 5 minutes
 
 
-/* --- STATIC PRAYER TIMES --- */
+/* STATIC PRAYER TIMES */
 const prayerTimes = {
   Fajr: "07:00",
   Dhuhr: "13:00",
@@ -370,7 +356,7 @@ function updateCountdowns(){
 }
 setInterval(updateCountdowns,1000);
 
-/* ANALOG CLOCK DRAWER */
+/* ANALOG CLOCK */
 function drawClock(canvasId, timeStr){
   const [h,m] = timeStr.split(":").map(Number);
   const canvas = document.getElementById(canvasId);
@@ -448,7 +434,6 @@ function drawClock(canvasId, timeStr){
   ctx.setTransform(1,0,0,1,0,0);
 }
 
-/* Draw initial clocks */
 for(const p of ["Fajr","Dhuhr","Asr","Isha","Khutbah"]){
   const t = prayerTimes[p];
   document.getElementById(p).innerText = t;
@@ -481,7 +466,7 @@ function updateDate(){
 }
 updateDate();
 
-/* FULLSCREEN ICON */
+/* FULLSCREEN ICON SYSTEM */
 const fsToggle = document.getElementById("fsToggle");
 const fsIcon = document.getElementById("fsIcon");
 
@@ -526,14 +511,15 @@ setTimeout(()=>{
 
 /* ANNOUNCEMENTS SYSTEM */
 const announcements = [
-  "Madrasah Sports Week",
-  "Family Circle on Sunday Afternoon",
-  "Mini Muslim on Sunday Morning",
-  "Weekend Madrasah on Saturday Morning",
-  "Normal Madrasah Mon to Fri from 5 PM to 06:30 PM",
-  "Hifz class Mon to Fri from 5PM to 7PM",
-  "Adults Urdu Quran Class on Mon & Fri from 07:20 to 08:30 PM",
-  "Adults English Quran Class on Wed from 07:20 to 08:30 PM"
+  "MADRASAH MAIN ACTIVITY: Learning about Prophet ISA AS",
+  "SISTER'S CIRCLE: About Islam Every Tuesday & Sunday",
+  "NEXT FAMILY CIRCLR: Date to be Announced",
+  "MINI MUSLIM: Every Sunday Morning from 11:00 AM to 12:30 PM",
+  "WEEKEND MADRASAH: Every Saturday Morning from 11:00 AM to 01:00 PM",
+  "MADRASAH CLASSES: Mon to Fri from 5 PM to 06:30 PM",
+  "HIFZ CLASS:  Mon to Fri from 5PM to 7PM",
+  "URDU QURAN CLASS: For Adults, Every Mon & Fri from 07:20 to 08:30 PM",
+  "ENGLISH QURAN CLASS: For Adults, Every Wed from 07:20 to 08:30 PM"
 ];
 
 let annIndex = 0;
