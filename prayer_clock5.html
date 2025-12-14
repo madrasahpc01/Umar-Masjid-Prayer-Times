@@ -61,10 +61,32 @@ html, body {
   width: 133%;
   height: 133%;
 }
+
+/* ===============================
+   MASJID LOGO – TOP LEFT (GLOBAL)
+   =============================== */
+#masjidLogo {
+  position: fixed;
+  top: 20px;
+  left: 60px;
+  height: clamp(50px, 7vh, 100px);
+  max-width: 200px;
+  object-fit: contain;
+  z-index: 9999;
+  background: rgba(0,0,0,0.4);
+  padding: 6px;
+  border-radius: 8px;
+
+}
+
 </style>
 </head>
 
 <body>
+
+<!-- MASJID LOGO -->
+<img id="masjidLogo" src="logo.png" alt="Masjid Logo">
+
 
 <div id="screen">
 
@@ -203,12 +225,12 @@ The name of the MP4 video is isa_miracle.mp4 & My html code is below:
     }
     .clock-main {
       margin-top: 30px;
-      font-size: 60px;
+      font-size: 75px;
       font-weight: bold;
       text-shadow: 0px 0px 15px cyan;
     }
     .title {
-      font-size: 40px;
+      font-size: 50px;
       margin-top: 15px;
       font-weight: bold;
       color: yellow;
@@ -254,8 +276,6 @@ The name of the MP4 video is isa_miracle.mp4 & My html code is below:
       color: green;
       font-size: 18px;
       font-weight: bold;
-      border: 2px solid #00ffe5;
-      box-shadow: 0 0 10px #00ffe5;
       background: rgba(0,0,0,0.6);
       padding: 10px;
       border-radius: 5px;
@@ -336,15 +356,13 @@ The name of the MP4 video is isa_miracle.mp4 & My html code is below:
 .video-date {
   position: absolute;
   top: 10px;
-  left: 30px;
+  left: 80px;
   font-size: 22px;
   font-weight: bold;
   color: #00ffcc;
   background: rgba(0,0,0,0.55);
   padding: 12px 18px;
   border-radius: 10px;
-  border: 2px solid #00ffe5;
-  box-shadow: 0 0 12px #00ffe5;
   z-index: 5;
   text-align: left;
 }
@@ -352,7 +370,7 @@ The name of the MP4 video is isa_miracle.mp4 & My html code is below:
 .video-weather {
   position: absolute;
   top: 10px;
-  right: 30px;
+  right: 80px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -362,8 +380,6 @@ The name of the MP4 video is isa_miracle.mp4 & My html code is below:
   background: rgba(0,0,0,0.55);
   padding: 12px 18px;
   border-radius: 10px;
-  border: 2px solid #00ffe5;
-  box-shadow: 0 0 12px #00ffe5;
   z-index: 5;
 }
 
@@ -746,6 +762,5 @@ updateAnnouncement();
 
 </body>
 </html>
-
 
 
