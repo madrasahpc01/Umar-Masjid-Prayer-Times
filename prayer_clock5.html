@@ -184,17 +184,6 @@ html, body {
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment-hijri@2.1.0/moment-hijri.min.js"></script>
 
-Create html code and run 2 x displays at same time:
-Use my Html code on display 1.
-Play MP4 video on display 2.
-use 1/3 display to show my html.
-Use 2/3 display to play continuous video in loop.
-Display one goes in L Shape. Left column will show all prayer times as per my html.
-Bottom row will run the announcements from my html.
-remaining screen will be use to play mp4 video.
-
-The name of the MP4 video is isa_miracle.mp4 & My html code is below:
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -388,14 +377,11 @@ The name of the MP4 video is isa_miracle.mp4 & My html code is below:
   height: 45px;
 }
 
-
-
   </style>
 </head>
 
 <body>
 
- 
  <div class="overlay"></div>
 
   <!-- FULLSCREEN TOGGLE ICON -->
@@ -680,7 +666,7 @@ function updateDate(){
   document.getElementById("gregorianDate").innerText =
     moment().format("dddd, MMMM Do YYYY");
   document.getElementById("hijriDate").innerText =
-    moment().format("iDD iMMMM iYYYY");
+  moment().add(1, "day").format("iDD iMMMM iYYYY");
 }
 updateDate();
 
@@ -729,7 +715,7 @@ setTimeout(()=>{
 
 /* ANNOUNCEMENTS SYSTEM */
 const announcements = [
-  "Madrasah Main Activity: Learning about Prophet ISA AS",
+  "Madrasah Holidays: From 22nd Dec 2025 till 6 Jan 2025",
   "Sister's Circle: About Islam Every Tuesday & Sunday",
   "Next Family Circle: Date to be Announced",
   "Mini Muslim: Every Sunday Morning from 11:00 AM to 12:30 PM",
@@ -762,3 +748,4 @@ updateAnnouncement();
 
 </body>
 </html>
+
