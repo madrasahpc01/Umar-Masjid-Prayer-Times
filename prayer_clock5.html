@@ -76,7 +76,6 @@ html, body {
   background: rgba(0,0,0,0.4);
   padding: 6px;
   border-radius: 8px;
-
 }
 
 </style>
@@ -668,7 +667,11 @@ function updateDate(){
   document.getElementById("hijriDate").innerText =
   moment().add(1, "day").format("iDD iMMMM iYYYY");
 }
+// Run immediately
 updateDate();
+
+// Update every minute (safe & light)
+setInterval(updateDate, 60000);
 
 /* FULLSCREEN ICON SYSTEM */
 const fsToggle = document.getElementById("fsToggle");
@@ -748,4 +751,3 @@ updateAnnouncement();
 
 </body>
 </html>
-
