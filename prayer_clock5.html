@@ -621,7 +621,7 @@ function updateDate(){
   document.getElementById("gregorianDate").innerText =
     moment().format("dddd, MMMM Do YYYY");
   document.getElementById("hijriDate").innerText =
-  moment().add(1, "day").format("iDD iMMMM iYYYY");
+  moment().format("iDD iMMMM iYYYY");
 }
 // Run immediately
 updateDate();
@@ -707,6 +707,7 @@ updateAnnouncement();
 
 </body>
 </html>
+
 
 
 
