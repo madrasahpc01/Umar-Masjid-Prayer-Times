@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Prayer Times Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        background: #ffffff;
+        color: #000;
+        }
+
+    h2 {
+        margin: 0 0 10px 0;
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+     .prayer-block {
+        display: flex;
+        align-items: center;
+        width: 48%; /* ensures equal width for pairs */
+        justify-content: center;
+        padding: 10px;
+    }
+
+    .prayer-info {
+        margin-left: 15px;
+    }
+
+    .prayer-name {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+
+    .prayer-time {
+        font-size: 1.6rem;
+        margin-top: 5px;
+    }
+
+    .countdown {
+        font-size: 1.0rem;
+        opacity: 0.8;
+    }
+
+    .current {
+        background: rgba(0, 128, 0, 0.15);
+        border-left: 5px solid green;
+        padding-left: 10px;
+    }
+
+    .prayer-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 25px; /* equal spacing */
+        margin-bottom: 20px;
+    }
+
+
+    .prayer-row.two {
+        justify-content: space-between;
+    }
+
+    .prayer-row.one {
+        justify-content: center;
+    }
+
+    .prayer-block canvas {
+        margin-right: 15px;
+    }
+
+    #content-box {
+        padding: 0;
+    }
+
+    iframe {
+        display: block;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- ROW 1: Fajr + Dhuhr -->
+<div class="prayer-row two">
+    <div class="prayer-block" id="blockFajr">
+        <canvas id="clockFajr" width="130" height="130"></canvas>
+        <div class="prayer-info">
+            <div class="prayer-name">Fajr</div>
+            <div id="Fajr" class="prayer-time">--:--</div>
+            <div id="countFajr" class="countdown">--</div>
+        </div>
+    </div>
+
+    <div class="prayer-block" id="blockDhuhr">
+        <canvas id="clockDhuhr" width="130" height="130"></canvas>
+        <div class="prayer-info">
+            <div class="prayer-name">Dhuhr</div>
+            <div id="Dhuhr" class="prayer-time">--:--</div>
+            <div id="countDhuhr" class="countdown">--</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ROW 2: Asr + Maghrib Prayer -->
+<div class="prayer-row two">
+    <div class="prayer-block" id="blockAsr">
+        <canvas id="clockAsr" width="130" height="130"></canvas>
+        <div class="prayer-info">
+            <div class="prayer-name">Asr</div>
+            <div id="Asr" class="prayer-time">--:--</div>
+            <div id="countAsr" class="countdown">--</div>
+        </div>
+    </div>
+
+    <div class="prayer-block" id="blockMaghrib">
+        <canvas id="clockMaghrib" width="130" height="130"></canvas>
+        <div class="prayer-info">
+            <div class="prayer-name">Maghrib</div>
+            <div id="Maghrib" class="prayer-time">--:--</div>
+            <div id="countMaghrib" class="countdown">--</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ROW 3: Isha + Friday-->
+<div class="prayer-row two">
+    <div class="prayer-block" id="blockIsha">
+        <canvas id="clockIsha" width="130" height="130"></canvas>
+        <div class="prayer-info">
+            <div class="prayer-name">Isha</div>
+            <div id="Isha" class="prayer-time">--:--</div>
+            <div id="countIsha" class="countdown">--</div>
+        </div>
+    </div>
+
+    <div class="prayer-block" id="blockKhutbah">
+        <canvas id="clockKhutbah" width="130" height="130"></canvas>
+        <div class="prayer-info">
+            <div class="prayer-name">Friday Prayer</div>
+            <div id="Khutbah" class="prayer-time">--:--</div>
+            <div id="countKhutbah" class="countdown">--</div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* STATIC PRAYER TIMES */
+const prayerTimes = {
+  Fajr: "07:00",
+  Dhuhr: "13:00",
+  Asr: "14:30",
+  Maghrib: "17:00",
+  Isha: "19:00",
+  Khutbah: "13:00"
+};
+
+window.prayerTimesFull = { ...prayerTimes };
+
+/* GET PRAYER DATE */
+function getPrayerDate(timeStr){
+  const [h,m] = timeStr.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h,m,0,0);
+  if (d <= new Date()) d.setDate(d.getDate()+1);
+  return d;
+}
+
+/* FRIDAY KHUTBAH */
+function getNextFriday() {
+  const now = new Date();
+  const diff = (5 - now.getDay() + 7) % 7;
+  const f = new Date(now);
+  f.setDate(now.getDate() + diff);
+  f.setHours(13,0,0,0);
+  return f;
+}
+
+function updateKhutbahCountdown() {
+  const now = new Date();
+  const nextFriday = getNextFriday();
+  const diff = nextFriday - now;
+
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+
+  document.getElementById("countKhutbah").innerText =
+    `${days}d ${hours}h ${mins}m ${secs}s`;
+}
+updateKhutbahCountdown();
+setInterval(updateKhutbahCountdown, 1000);
+
+/* COUNTDOWNS */
+function updateCountdowns(){
+  const now = new Date();
+  let closest = Infinity;
+  let active = null;
+
+  for (const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha"]) {
+    const t = window.prayerTimesFull[p];
+    if (!t) continue;
+
+    const pd = getPrayerDate(t);
+    const diff = pd - now;
+
+    const h = Math.floor(diff/3600000);
+    const m = Math.floor((diff%3600000)/60000);
+    const s = Math.floor((diff%60000)/1000);
+
+    document.getElementById("count"+p).innerText =
+      `${h}h ${m}m ${s}s`;
+
+    if (diff >=0 && diff < closest) {
+      closest = diff;
+      active = p;
+    }
+  }
+
+  for (const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha","Khutbah"]) {
+    const block = document.getElementById("block"+p);
+    if (block) block.classList.toggle("current", p === active);
+  }
+}
+updateCountdowns();
+setInterval(updateCountdowns,1000);
+
+/* ANALOG CLOCK */
+function drawClock(canvasId, timeStr){
+  const [h,m] = timeStr.split(":").map(Number);
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  const r = canvas.height/2;
+  ctx.translate(r,r);
+
+  function face(){ 
+    ctx.beginPath();
+    ctx.arc(0,0,r*0.95,0,2*Math.PI);
+    ctx.fillStyle="rgba(255,255,255,0.05)";
+    ctx.fill();
+    ctx.strokeStyle="gold";
+    ctx.lineWidth=3;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0,0,r*0.08,0,2*Math.PI);
+    ctx.fill();
+
+    ctx.fillStyle = "brown";
+    ctx.font = `${r*0.2}px Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    for (let n = 1; n <= 12; n++) {
+        let angle = (n * Math.PI / 6) - Math.PI / 2;
+        let x = Math.cos(angle) * r * 0.75;
+        let y = Math.sin(angle) * r * 0.75;
+        ctx.fillText(n.toString(), x, y);
+    }
+  }
+
+  function hands(hh,mm){
+    hh%=12;
+    hh = hh*Math.PI/6 + mm*Math.PI/(6*60);
+    hand(hh,r*0.5,5);
+    hand((mm*Math.PI)/30,r*0.8,3);
+  }
+
+  function hand(pos,len,w){
+    ctx.beginPath();
+    ctx.lineWidth=w;
+    ctx.lineCap="round";
+    ctx.rotate(pos);
+    ctx.moveTo(0,0);
+    ctx.lineTo(0,-len);
+    ctx.stroke();
+    ctx.rotate(-pos);
+  }
+
+  ctx.clearRect(-r,-r,canvas.width,canvas.height);
+  face(); hands(h,m);
+  ctx.setTransform(1,0,0,1,0,0);
+}
+
+for(const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha","Khutbah"]){
+  const t = prayerTimes[p];
+  document.getElementById(p).innerText = t;
+  drawClock("clock"+p,t);
+}
+
+/* MAGHRIB FETCH */
+async function fetchMaghrib(){
+  try {
+    const res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Birmingham&country=United%20Kingdom&method=2");
+    const data = await res.json();
+    const match = data.data.timings.Maghrib.match(/^(\d{1,2}):(\d{2})/);
+    if(match){
+      const m = match[1].padStart(2,"0")+":"+match[2];
+      window.prayerTimesFull.Maghrib = m;
+      document.getElementById("Maghrib").innerText = m;
+      drawClock("clockMaghrib",m);
+    }
+  } catch(e){}
+}
+fetchMaghrib();
+setInterval(fetchMaghrib,86400000);
+</script>
+
+</body>
+</html>
