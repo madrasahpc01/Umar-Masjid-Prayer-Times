@@ -8,87 +8,130 @@
 <style>
     body {
         margin: 0;
-        padding: 20px;
+        padding: 0px;
         font-family: Arial, sans-serif;
         background: #ffffff;
         color: #000;
-        }
+    }
 
-    h2 {
-        margin: 0 0 10px 0;
+    /* Title */
+    #nextPrayerTitle {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        text-align: center;
         font-size: 2rem;
         font-weight: bold;
-      }
+        margin-bottom: 20px;
+        color: #333;
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+        animation: titleGlow 3s ease-in-out infinite;
+    }
 
-     .prayer-block {
+    html, body {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    * {
+        margin-top: 0 !important;
+    }
+
+    @keyframes titleGlow {
+        0%   { text-shadow: 0 0 6px rgba(255,215,0,0.4); }
+        50%  { text-shadow: 0 0 16px rgba(255,215,0,1); }
+        100% { text-shadow: 0 0 6px rgba(255,215,0,0.4); }
+    }
+
+    /* MAIN FLEX CONTAINER */
+    #container {
         display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 25px;
+    }
+
+    /* BLOCK BASE */
+    .prayer-block {
+        display: none; /* JS will enable */
         align-items: center;
-        width: 48%; /* ensures equal width for pairs */
         justify-content: center;
         padding: 10px;
-    }
-
-    .prayer-info {
-        margin-left: 15px;
-    }
-
-    .prayer-name {
-        font-size: 1.8rem;
-        font-weight: bold;
-    }
-
-    .prayer-time {
-        font-size: 1.6rem;
-        margin-top: 5px;
-    }
-
-    .countdown {
-        font-size: 1.0rem;
-        opacity: 0.8;
-    }
-
-    .current {
-        background: rgba(0, 128, 0, 0.15);
-        border-left: 5px solid green;
-        padding-left: 10px;
-    }
-
-    .prayer-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 25px; /* equal spacing */
-        margin-bottom: 20px;
-    }
-
-
-    .prayer-row.two {
-        justify-content: space-between;
-    }
-
-    .prayer-row.one {
-        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.4s ease;
     }
 
     .prayer-block canvas {
         margin-right: 15px;
     }
 
-    #content-box {
-        padding: 0;
+    .prayer-info {
+        text-align: left;
     }
 
-    iframe {
-        display: block;
+    .prayer-name {
+        font-weight: bold;
     }
+
+    .prayer-time {
+        margin-top: 4px;
+    }
+
+    .countdown {
+        margin-top: 2px;
+        color: #007bff;
+    }
+
+    /* LARGE BLOCK (Row 1) */
+    .large-block canvas {
+        width: 155px;
+        height: 155px;
+    }
+    .large-block .prayer-name { font-size: 2rem; }
+    .large-block .prayer-time { font-size: 1.5rem; }
+    .large-block .countdown { font-size: 1.3rem; }
+
+    .large-block {
+        box-shadow: 0 0 10px rgba(255,215,0,0.4);
+        border: 2px solid gold;
+        animation: pulseGlow 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+        0%   { box-shadow: 0 0 10px rgba(255,215,0,0.4); transform: scale(1); }
+        50%  { box-shadow: 0 0 30px rgba(255,215,0,1);   transform: scale(1.03); }
+        100% { box-shadow: 0 0 10px rgba(255,215,0,0.4); transform: scale(1); }
+    }
+
+    /* SMALL BLOCKS (Row 2 & 3) */
+    .small-block canvas {
+        width: 80px;
+        height: 80px;
+    }
+    .small-block .prayer-name { font-size: 1.2rem; }
+    .small-block .prayer-time { font-size: 1.2rem; }
+    .small-block .countdown { font-size: 1.0rem; }
+
+    /* FRIDAY PRAYER */
+    #blockKhutbah canvas {
+        width: 100px;
+        height: 100px;
+    }
+    #blockKhutbah .prayer-name { font-size: 1.5rem; }
+    #blockKhutbah .prayer-time { font-size: 1.2rem; }
+    #blockKhutbah .countdown { font-size: 1rem; }
+
 </style>
 </head>
 
 <body>
 
-<!-- ROW 1: Fajr + Dhuhr -->
-<div class="prayer-row two">
+<h2 id="nextPrayerTitle">Next Prayer</h2>
+
+<!-- STATIC DOM — ALL BLOCKS ALWAYS PRESENT -->
+<div id="container">
+
     <div class="prayer-block" id="blockFajr">
-        <canvas id="clockFajr" width="130" height="130"></canvas>
+        <canvas id="clockFajr" width="200" height="200"></canvas>
         <div class="prayer-info">
             <div class="prayer-name">Fajr</div>
             <div id="Fajr" class="prayer-time">--:--</div>
@@ -97,20 +140,16 @@
     </div>
 
     <div class="prayer-block" id="blockDhuhr">
-        <canvas id="clockDhuhr" width="130" height="130"></canvas>
+        <canvas id="clockDhuhr" width="200" height="200"></canvas>
         <div class="prayer-info">
             <div class="prayer-name">Dhuhr</div>
             <div id="Dhuhr" class="prayer-time">--:--</div>
             <div id="countDhuhr" class="countdown">--</div>
         </div>
     </div>
-</div>
 
-
-<!-- ROW 2: Asr + Maghrib Prayer -->
-<div class="prayer-row two">
     <div class="prayer-block" id="blockAsr">
-        <canvas id="clockAsr" width="130" height="130"></canvas>
+        <canvas id="clockAsr" width="200" height="200"></canvas>
         <div class="prayer-info">
             <div class="prayer-name">Asr</div>
             <div id="Asr" class="prayer-time">--:--</div>
@@ -119,20 +158,16 @@
     </div>
 
     <div class="prayer-block" id="blockMaghrib">
-        <canvas id="clockMaghrib" width="130" height="130"></canvas>
+        <canvas id="clockMaghrib" width="200" height="200"></canvas>
         <div class="prayer-info">
             <div class="prayer-name">Maghrib</div>
             <div id="Maghrib" class="prayer-time">--:--</div>
             <div id="countMaghrib" class="countdown">--</div>
         </div>
     </div>
-</div>
 
-
-<!-- ROW 3: Isha + Friday-->
-<div class="prayer-row two">
     <div class="prayer-block" id="blockIsha">
-        <canvas id="clockIsha" width="130" height="130"></canvas>
+        <canvas id="clockIsha" width="200" height="200"></canvas>
         <div class="prayer-info">
             <div class="prayer-name">Isha</div>
             <div id="Isha" class="prayer-time">--:--</div>
@@ -141,27 +176,29 @@
     </div>
 
     <div class="prayer-block" id="blockKhutbah">
-        <canvas id="clockKhutbah" width="130" height="130"></canvas>
+        <canvas id="clockKhutbah" width="200" height="200"></canvas>
         <div class="prayer-info">
             <div class="prayer-name">Friday Prayer</div>
             <div id="Khutbah" class="prayer-time">--:--</div>
             <div id="countKhutbah" class="countdown">--</div>
         </div>
     </div>
+
 </div>
 
 <script>
 /* STATIC PRAYER TIMES */
 const prayerTimes = {
-  Fajr: "07:00",
-  Dhuhr: "13:00",
-  Asr: "14:30",
+  Fajr:    "07:00",
+  Dhuhr:   "13:00",
+  Asr:     "14:30",
   Maghrib: "17:00",
-  Isha: "19:00",
+  Isha:    "19:00",
   Khutbah: "13:00"
 };
 
 window.prayerTimesFull = { ...prayerTimes };
+const orderedPrayers = ["Fajr","Dhuhr","Asr","Maghrib","Isha"];
 
 /* GET PRAYER DATE */
 function getPrayerDate(timeStr){
@@ -198,16 +235,54 @@ function updateKhutbahCountdown() {
 updateKhutbahCountdown();
 setInterval(updateKhutbahCountdown, 1000);
 
-/* COUNTDOWNS */
+/* FLEX ORDER ROTATION */
+function applyFlexOrder(active) {
+    const idx = orderedPrayers.indexOf(active);
+
+    const rem = [];
+    for (let i = 1; i <= 4; i++) {
+        rem.push(orderedPrayers[(idx + i) % orderedPrayers.length]);
+    }
+
+    // Row 1 (center)
+    document.getElementById("block" + active).style.order = 1;
+    document.getElementById("block" + active).className = "prayer-block large-block";
+    document.getElementById("block" + active).style.display = "flex";
+
+    // Row 2 (left + right)
+    document.getElementById("block" + rem[0]).style.order = 2;
+    document.getElementById("block" + rem[1]).style.order = 3;
+
+    document.getElementById("block" + rem[0]).className = "prayer-block small-block";
+    document.getElementById("block" + rem[1]).className = "prayer-block small-block";
+
+    document.getElementById("block" + rem[0]).style.display = "flex";
+    document.getElementById("block" + rem[1]).style.display = "flex";
+
+    // Row 3 (left + right)
+    document.getElementById("block" + rem[2]).style.order = 4;
+    document.getElementById("block" + rem[3]).style.order = 5;
+
+    document.getElementById("block" + rem[2]).className = "prayer-block small-block";
+    document.getElementById("block" + rem[3]).className = "prayer-block small-block";
+
+    document.getElementById("block" + rem[2]).style.display = "flex";
+    document.getElementById("block" + rem[3]).style.display = "flex";
+
+    // Row 4 (Friday Prayer)
+    document.getElementById("blockKhutbah").style.order = 6;
+    document.getElementById("blockKhutbah").style.display = "flex";
+}
+
+/* COUNTDOWNS + TITLE */
 function updateCountdowns(){
   const now = new Date();
   let closest = Infinity;
   let active = null;
+  let activeDiff = null;
 
-  for (const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha"]) {
+  for (const p of orderedPrayers) {
     const t = window.prayerTimesFull[p];
-    if (!t) continue;
-
     const pd = getPrayerDate(t);
     const diff = pd - now;
 
@@ -221,12 +296,15 @@ function updateCountdowns(){
     if (diff >=0 && diff < closest) {
       closest = diff;
       active = p;
+      activeDiff = {h,m,s};
     }
   }
 
-  for (const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha","Khutbah"]) {
-    const block = document.getElementById("block"+p);
-    if (block) block.classList.toggle("current", p === active);
+  if (active) {
+    applyFlexOrder(active);
+
+    const timeStr = window.prayerTimesFull[active];
+    const {h,m,s} = activeDiff;
   }
 }
 updateCountdowns();
@@ -245,7 +323,7 @@ function drawClock(canvasId, timeStr){
     ctx.arc(0,0,r*0.95,0,2*Math.PI);
     ctx.fillStyle="rgba(255,255,255,0.05)";
     ctx.fill();
-    ctx.strokeStyle="gold";
+    ctx.strokeStyle="black";
     ctx.lineWidth=3;
     ctx.stroke();
 
@@ -289,28 +367,13 @@ function drawClock(canvasId, timeStr){
   ctx.setTransform(1,0,0,1,0,0);
 }
 
+/* INITIAL CLOCK RENDER */
 for(const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha","Khutbah"]){
   const t = prayerTimes[p];
   document.getElementById(p).innerText = t;
   drawClock("clock"+p,t);
 }
 
-/* MAGHRIB FETCH */
-async function fetchMaghrib(){
-  try {
-    const res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Birmingham&country=United%20Kingdom&method=2");
-    const data = await res.json();
-    const match = data.data.timings.Maghrib.match(/^(\d{1,2}):(\d{2})/);
-    if(match){
-      const m = match[1].padStart(2,"0")+":"+match[2];
-      window.prayerTimesFull.Maghrib = m;
-      document.getElementById("Maghrib").innerText = m;
-      drawClock("clockMaghrib",m);
-    }
-  } catch(e){}
-}
-fetchMaghrib();
-setInterval(fetchMaghrib,86400000);
 </script>
 
 </body>
