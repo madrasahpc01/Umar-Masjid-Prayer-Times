@@ -239,6 +239,15 @@ function closeFullscreen() {
     else if (document.msExitFullscreen) document.msExitFullscreen();
 }
 
+/* ====================================
+   04. Auto Fullscreen After 10 Seconds
+   ==================================*/
+
+setTimeout(() => {
+    if (!document.fullscreenElement) {
+        openFullscreen();
+    }
+}, 10000); // 10 seconds
 // AUTO-HIDE CONTROLS
 function showControls() {
     const controls = document.getElementById("fullscreen-controls");
@@ -327,21 +336,12 @@ init(); // FIXED
 ...
 init(); // FIXED
 
-/* ===========================
-   06. Auto Refresh + Cache Bust
-   =========================== */
-
-setInterval(() => {
-    const base = window.location.origin + window.location.pathname;
-    const cacheBuster = "?v=" + Date.now();
-    window.location.replace(base + cacheBuster);
-}, 60 * 60 * 1000);
-
 </script>
 
 </body>
 
 </html>
+
 
 
 
