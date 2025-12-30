@@ -346,12 +346,51 @@ window.addEventListener("load", () => {
     }, 60 * 60 * 1000);
 });
 
+/* ===========================
+   07. Daily Scheduled Reload (3 AM)
+   =========================== */
+
+setInterval(() => {
+    const now = new Date();
+    if (now.getHours() === 3 && now.getMinutes() === 0) {
+        window.location.href = window.location.pathname + "?v=" + Date.now();
+    }
+}, 60 * 1000); // check every minute
+
+/* ===========================
+   08. Fullscreen Watchdog
+   =========================== */
+
+setInterval(() => {
+    if (!document.fullscreenElement) {
+        openFullscreen();
+    }
+}, 2000); // check every 2 seconds
+
+/* ===========================
+   09. Heartbeat Freeze Detector
+   =========================== */
+
+let lastTick = Date.now();
+
+// Track clock updates
+setInterval(() => {
+    lastTick = Date.now();
+}, 1000); // your clock updates every second
+
+// Watchdog
+setInterval(() => {
+    if (Date.now() - lastTick > 10000) { // 10 seconds freeze
+        window.location.href = window.location.pathname + "?v=" + Date.now();
+    }
+}, 5000);
 
 </script>
 
 </body>
 
 </html>
+
 
 
 
