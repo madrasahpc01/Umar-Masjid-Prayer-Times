@@ -333,8 +333,6 @@ async function init() {
 
 init(); // FIXED
 
-init(); // FIXED
-
 /* ===========================
    06. Auto Refresh + Cache Bust (Safe)
    =========================== */
@@ -385,11 +383,46 @@ setInterval(() => {
     }
 }, 5000);
 
+/* ===========================
+   10. YouTube Iframe Crash Recovery
+   =========================== */
+
+let ytLastAlive = Date.now();
+
+// Heartbeat: ping the iframe every 5 seconds
+setInterval(() => {
+    const iframe = document.querySelector("#video-box iframe");
+
+    if (!iframe) return;
+
+    // If iframe contentWindow exists, assume it's alive
+    try {
+        if (iframe.contentWindow) {
+            ytLastAlive = Date.now();
+        }
+    } catch (e) {
+        // Cross-origin errors are normal — ignore
+    }
+}, 5000);
+
+// Watchdog: if iframe hasn't responded for 20 seconds, reload it
+setInterval(() => {
+    if (Date.now() - ytLastAlive > 20000) {
+        const iframe = document.querySelector("#video-box iframe");
+        if (iframe) {
+            const src = iframe.src;
+            iframe.src = src; // reload iframe only
+            ytLastAlive = Date.now();
+        }
+    }
+}, 7000);
+
 </script>
 
 </body>
 
 </html>
+
 
 
 
