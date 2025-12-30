@@ -226,6 +226,16 @@ function toggleFullscreen() {
     }
 }
 
+/* ====================================
+   04. Auto Fullscreen After 10 Seconds
+   ================================= */
+
+setTimeout(() => {
+    if (!document.fullscreenElement) {
+        openFullscreen();
+    }
+}, 10000); // 10 seconds
+
 function openFullscreen() {
     const elem = document.documentElement;
     if (elem.requestFullscreen) elem.requestFullscreen();
@@ -265,7 +275,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* ===========================
-   04. Weather (safe)
+   05. Weather (safe)
    =========================== */
 async function loadWeather() {
   try {
@@ -328,7 +338,7 @@ init(); // FIXED
 init(); // FIXED
 
 /* ===========================
-   05. Auto Refresh + Cache Bust
+   06. Auto Refresh + Cache Bust
    =========================== */
 
 setInterval(() => {
@@ -342,4 +352,5 @@ setInterval(() => {
 </body>
 
 </html>
+
 
