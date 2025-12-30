@@ -333,11 +333,26 @@ async function init() {
 
 init(); // FIXED
 
+init(); // FIXED
+
+/* ===========================
+   06. Auto Refresh + Cache Bust (Safe)
+   =========================== */
+
+window.addEventListener("load", () => {
+    setInterval(() => {
+        const cacheBuster = "?v=" + Date.now();
+        window.location.href = window.location.pathname + cacheBuster;
+    }, 60 * 60 * 1000);
+});
+
+
 </script>
 
 </body>
 
 </html>
+
 
 
 
