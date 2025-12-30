@@ -84,15 +84,15 @@
         display: flex;
         align-items: center;
         overflow: hidden;
-        font-size: 2rem;
+        font-size: 1.8rem;
         font-weight: bold;
+        padding-left: 100%;
     }
 
-    #announcement span {
+    #announcementText {
         white-space: nowrap;
         display: inline-block;
-        padding-left: 100%;
-        animation: scroll-left 20s linear infinite;
+        opacity: 0;
     }
 
     @keyframes scroll-left {
@@ -126,6 +126,21 @@
 
     #fullscreen-controls button:hover {
         background: #444;
+    }
+
+    #info-bar {
+        width: 100%;
+        height: 6vh; /* adjustable */
+        background: linear-gradient(90deg, #0a0a0a, #1a1a1a, #0a0a0a); 
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        font-size: 1.6rem;
+        font-weight: 700;
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
     }
 
 </style>
@@ -173,11 +188,32 @@
             playsinline>
         </iframe>
     </div>
-
-<!-- ANNOUNCEMENT BAR -->
-<div id="announcement">
-    <span>Welcome to the Umar Masjid — Please maintain silence — Madrasah will resume on 7th January 2026 —  Next Upcoming Event in Madrasah: Isra Wal Mi'raj — Jazakumullahu Khairan</span>
 </div>
+    
+<div id="info-bar">
+      <div class="row">
+        <span class="left-glow" id="infoLeft">
+            📢 Juma Urdu Speech: 12:30
+        </span>
+      </div>
+
+      <div class="row">
+        <span class="right-glow" id="infoRight">
+            🕌 Friday Khutba: 13:00
+        </span>
+    </div>
+
+    <div class="row">
+        <span class="right-glow" id="infoRight2">
+            📅 Madrasah Reopens: 7 Jan 2026
+        </span>
+    </div>
+  </div>
+
+  <!-- ANNOUNCEMENT BAR -->
+  <div id="announcement">
+      <div id="announcementText"></div>
+  </div>
 
 <script>
 let state = {};  // FIXED
@@ -420,11 +456,72 @@ setInterval(() => {
     }
 }, 7000);
 
+/* ===========================
+   11. Announcements
+   =========================== */
+
+const announcements = [
+    "🕌 Welcome to the Umar Masjid News & Updates — Please maintain silence 🤫",
+    "👨‍👩‍👧 Madrasah Parents' Evening on Tuesday 6 Jan",
+    "🌙 Madrasah Upcoming Event: Isra wal Mi'raj & Speech Competition on Friday 16 Jan",
+    "📘 Madrasah Classes: Mon to Fri from 5 PM to 06:30 PM",
+    "📖 Hifz Class: Mon to Fri from 5PM to 7PM",
+    "🗓️ Weekend Madrasah: Every Saturday Morning from 11:00 AM to 01:00 PM",
+    "🌟 Mini Muslim: Every Sunday Morning from 11:00 AM to 12:30 PM",
+    "📚 Urdu Quran Class: For Adults, Every Mon & Fri from 07:20 to 08:30 PM",
+    "📚 English Quran Class: For Adults, Every Wed from 07:20 to 08:30 PM",
+    "👭 Sister's Circle: About Islam Every Tuesday & Sunday",
+    "👨‍👩‍👧‍👦 Next Family Circle: Date to be Announced",
+    "🤲 Jazakumullahu Khairan"
+];
+let index = 0;
+
+function showAnnouncement() {
+    const box = document.getElementById("announcementText");
+
+    // Set text
+    box.innerText = announcements[index];
+
+    // Reset animation
+    box.style.animation = "none";
+    void box.offsetWidth; // force reflow
+
+    // Apply animation
+    box.style.animation = "scroll-left 20s linear forwards";
+
+    // Move to next announcement
+    index = (index + 1) % announcements.length;
+
+    // Pause 1 second after scroll ends
+    setTimeout(showAnnouncement, 13000);
+}
+
+// Animation keyframes
+const style = document.createElement("style");
+style.innerHTML = `
+@keyframes scroll-left {
+    0% {
+        transform: translateX(100%);
+        opacity: 1;
+    }
+    90% {
+        transform: translateX(-100%);
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}`;
+document.head.appendChild(style);
+
+window.onload = showAnnouncement;
+
 </script>
 
 </body>
 
 </html>
+
 
 
 
