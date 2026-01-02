@@ -78,7 +78,7 @@
         position: absolute;
         bottom: 0;
         width: 100%;
-        height: 8vh;
+        height: 7.5vh;
         background: #222;
         color: #fff;
         display: flex;
@@ -137,7 +137,7 @@
         align-items: center;
         justify-content: space-between;
         padding: 0px;
-        font-size: 1.8rem;
+        font-size: 1.9rem;
         font-weight: 700;
         border-top: 2px solid #333;
         border-bottom: 2px solid #333;
@@ -407,7 +407,7 @@ setInterval(() => {
     const now = new Date();
 
     // Trigger at 3:00 AM OR 3:00 PM
-    if ((now.getHours() === 10 || now.getHours() === 15) && now.getMinutes() === 0) {
+    if ((now.getHours() === 3 || now.getHours() === 15) && now.getMinutes() === 0) {
         window.location.href = window.location.pathname + "?v=" + Date.now();
     }
 
@@ -589,6 +589,7 @@ updateRamadanCountdown();
 </body>
 
 </html>
+
 
 
 
