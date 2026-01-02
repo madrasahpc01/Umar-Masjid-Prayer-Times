@@ -212,7 +212,13 @@ function getPrayerDate(timeStr){
 /* FRIDAY KHUTBAH */
 function getNextFriday() {
   const now = new Date();
-  const diff = (5 - now.getDay() + 7) % 7;
+  let diff = (5 - now.getDay() + 7) % 7;
+
+  // If today is Friday AND it's already past 13:00 → go to next Friday
+  if (diff === 0 && now.getHours() >= 13) {
+    diff = 7;
+  }
+  
   const f = new Date(now);
   f.setDate(now.getDate() + diff);
   f.setHours(13,0,0,0);
@@ -378,6 +384,7 @@ for(const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha","Khutbah"]){
 
 </body>
 </html>
+
 
 
 
