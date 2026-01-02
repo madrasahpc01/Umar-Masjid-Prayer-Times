@@ -407,7 +407,7 @@ setInterval(() => {
     const now = new Date();
 
     // Trigger at 3:00 AM OR 3:00 PM
-    if ((now.getHours() === 3 || now.getHours() === 15) && now.getMinutes() === 0) {
+    if ((now.getHours() === 10 || now.getHours() === 15) && now.getMinutes() === 0) {
         window.location.href = window.location.pathname + "?v=" + Date.now();
     }
 
@@ -589,6 +589,7 @@ updateRamadanCountdown();
 </body>
 
 </html>
+
 
 
 
