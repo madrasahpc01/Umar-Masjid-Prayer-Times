@@ -192,7 +192,7 @@ const prayerTimes = {
   Fajr:    "07:00",
   Dhuhr:   "13:00",
   Asr:     "14:30",
-  Maghrib: "17:00",
+  Maghrib: "--:--",   // will be fetched
   Isha:    "19:00",
   Khutbah: "13:00"
 };
@@ -207,6 +207,38 @@ function getPrayerDate(timeStr){
   d.setHours(h,m,0,0);
   if (d <= new Date()) d.setDate(d.getDate()+1);
   return d;
+}
+
+async function fetchMaghribFromSunset() {
+  try {
+    const lat = 52.45;
+    const lon = -2.05;
+
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunset&timezone=Europe/London`
+    );
+    const data = await res.json();
+
+    // Sunset example: "2026-01-05T16:12"
+    const sunsetISO = data.daily.sunset[0];
+    const sunsetDate = new Date(sunsetISO);
+
+    const hh = sunsetDate.getHours().toString().padStart(2, "0");
+    const mm = sunsetDate.getMinutes().toString().padStart(2, "0");
+
+    const maghribTime = `${hh}:${mm}`;
+
+    // Update global prayer times
+    prayerTimes.Maghrib = maghribTime;
+    window.prayerTimesFull.Maghrib = maghribTime;
+
+    // Update UI
+    document.getElementById("Maghrib").innerText = maghribTime;
+    drawClock("clockMaghrib", maghribTime);
+
+  } catch (err) {
+    console.error("Failed to fetch Maghrib (sunset)", err);
+  }
 }
 
 /* FRIDAY KHUTBAH */
@@ -380,10 +412,18 @@ for(const p of ["Fajr","Dhuhr","Asr","Maghrib","Isha","Khutbah"]){
   drawClock("clock"+p,t);
 }
 
+fetchMaghribFromSunset();
+
+// Refresh once per day (midnight)
+setInterval(fetchMaghribFromSunset, 24 * 60 * 60 * 1000);
+
+window.prayerTimesFull = { ...prayerTimes };
+
 </script>
 
 </body>
 </html>
+
 
 
 
