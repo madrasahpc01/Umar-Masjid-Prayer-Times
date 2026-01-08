@@ -228,7 +228,7 @@
 
     <div class="row">
         <span class="right-glow" id="infoRight2">
-            📅 Upcoming Eveny: Fri 16 Jan @ 5PM
+            📅 Upcoming Event: Fri 16 Jan @ 5PM
         </span>
     </div>
 </div>
@@ -566,7 +566,7 @@ function updateRamadanCountdown() {
     const weeks = Math.floor(remainingDaysAfterMonths / 7);
     const finalDays = remainingDaysAfterMonths % 7;
 
-    const newText = `🌙 Ramadan: ${months}Month ${weeks}Week ${finalDays}Days`;
+    const newText = `🌙 Ramadan: ${months}Month ${weeks}Week ${finalDays}Day`;
 
     // Fade out
     el.style.opacity = 0;
@@ -593,6 +593,7 @@ updateRamadanCountdown();
 </body>
 
 </html>
+
 
 
 
