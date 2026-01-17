@@ -560,14 +560,19 @@ function updateRamadanCountdown() {
         return;
     }
 
-    // Total remaining days
-    const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+   // Total remaining days
+   const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    // Convert to weeks & days
-    const weeks = Math.floor(totalDays / 7);
-    const days = totalDays % 7;
+   // Convert to weeks & days
+   const weeks = Math.floor(totalDays / 7);
+   const days = totalDays % 7;
 
-    const newText = `🌙 Ramadan: ${weeks} Weeks & ${days} D`;
+   function pluralize(value, singular, plural) {
+       return value === 1 ? singular : plural;
+   }
+
+   const newText = `🌙 Ramadan: ${weeks} ${pluralize(weeks, "Week", "Weeks")} ${days} ${pluralize(days, "Day", "Days")}`;
+
 
     // Fade out
     el.style.opacity = 0;
@@ -594,5 +599,6 @@ updateRamadanCountdown();
 </body>
 
 </html>
+
 
 
