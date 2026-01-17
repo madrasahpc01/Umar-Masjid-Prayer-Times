@@ -539,9 +539,9 @@ document.head.appendChild(style);
 
 window.onload = showAnnouncement;
 
-// ===============================
-// Ramadan Countdown (Weeks & Days)
-// ===============================
+// ====================================
+// 12. Ramadan Countdown (Weeks & Days)
+// ====================================
 
 // Set next Ramadan start date
 const ramadanStart = new Date("2026-02-17T00:00:00");
@@ -567,7 +567,7 @@ function updateRamadanCountdown() {
     const weeks = Math.floor(totalDays / 7);
     const days = totalDays % 7;
 
-    const newText = `🌙 Ramadan: ${weeks} W ${days} D`;
+    const newText = `🌙 Ramadan: ${weeks} Weeks & ${days} D`;
 
     // Fade out
     el.style.opacity = 0;
@@ -594,4 +594,5 @@ updateRamadanCountdown();
 </body>
 
 </html>
+
 
