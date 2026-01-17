@@ -539,17 +539,17 @@ document.head.appendChild(style);
 
 window.onload = showAnnouncement;
 
-// ===========================================
-// 12. Ramadan Countdown (Months, Weeks, Days)
-// ===========================================
+// ===============================
+// Ramadan Countdown (Weeks & Days)
+// ===============================
 
-// Set next Ramadan start date (adjust yearly)
+// Set next Ramadan start date
 const ramadanStart = new Date("2026-02-17T00:00:00");
 const el = document.getElementById("ramadanCountdown");
 let isFading = false; // prevents overlapping fades
 
 function updateRamadanCountdown() {
-    if (isFading) return; // avoid stacking animations
+    if (isFading) return;
     isFading = true;
 
     const now = new Date();
@@ -560,13 +560,14 @@ function updateRamadanCountdown() {
         return;
     }
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const months = Math.floor(days / 30);
-    const remainingDaysAfterMonths = days % 30;
-    const weeks = Math.floor(remainingDaysAfterMonths / 7);
-    const finalDays = remainingDaysAfterMonths % 7;
+    // Total remaining days
+    const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    const newText = `🌙 Ramadan: ${months}Month ${finalDays}Days`;
+    // Convert to weeks & days
+    const weeks = Math.floor(totalDays / 7);
+    const days = totalDays % 7;
+
+    const newText = `🌙 Ramadan: ${weeks} W ${days} D`;
 
     // Fade out
     el.style.opacity = 0;
@@ -576,20 +577,21 @@ function updateRamadanCountdown() {
         el.innerHTML = newText;
         el.style.opacity = 1;
 
-        // Allow next update after fade-in completes
         setTimeout(() => {
             isFading = false;
         }, 1500);
 
-    }, 2000); // matches CSS transition
+    }, 2000);
 }
 
-// Run every 5 seconds
+// Run every 6 seconds
 setInterval(updateRamadanCountdown, 6000);
 updateRamadanCountdown();
+
 
 </script>
 
 </body>
 
 </html>
+
