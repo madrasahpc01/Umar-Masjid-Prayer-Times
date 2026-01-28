@@ -25,11 +25,11 @@
     }
 
     #header .logo {
-        height: 60px;
-        width: 60px;        /* Make it a square box */
+        height: 65px;
+        width: 65px;        /* Make it a square box */
         border-radius: 50%; /* Turn it into a circle */
         object-fit: cover;  /* Crop image nicely */
-        border: 2px solid white;
+        border: 2px solid gold;
     }
 
     #header .title {
@@ -90,9 +90,8 @@
         overflow: hidden;
         font-size: 2.0rem;
         font-weight: bold;
-        padding-left: 20px;
+        padding-left: 0px;
     }
-
     #announcementText {
         white-space: nowrap;
         display: inline-block;
@@ -133,20 +132,19 @@
     }
 
     #info-bar {
-        position: absolute;
-        bottom: 1;
         width: 100%;
-        height: 6.5vh; /* adjustable */
+        height: 8vh; /* adjustable */
         background: linear-gradient(90deg, #0a0a0a, #1a1a1a, #0a0a0a); 
         color: white;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0px;
-        font-size: 1.9rem;
+        font-size: 1.8rem;
         font-weight: 700;
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
     }
-
+     
     #ramadanCountdown {
         opacity: 1;
         margin: 0;
@@ -155,8 +153,8 @@
         transition: opacity 2.0s ease-in-out;
         /* match info-bar height */
         height: 8vh;
-        line-height: 8vh;
-        font-size: 2.0rem
+        line-height: 6vh;
+
         display: flex;
         align-items: center;
         justify-content: center;
@@ -208,30 +206,30 @@
         <iframe 
             width="100%" 
             height="100%" 
-            src="https://www.youtube.com/embed/6a5qc9SYalw?autoplay=1&mute=1&controls=0&modestbranding=1&playlist=6a5qc9SYalw,6a5qc9SYalw,4zM4aNyD3Kw&loop=1"
+            src="https://www.youtube.com/embed/6a5qc9SYalw?autoplay=1&mute=1&loop=1&playlist=6a5qc9SYalw&controls=0&modestbranding=1"
             frameborder="0"
             allow="autoplay; encrypted-media"
             allowfullscreen>
             playsinline>
         </iframe>
     </div>
-</div>
-    
-<div id="info-bar">
-    <div class="row">
+  </div>
+
+    <div id="info-bar">
+      <div class="row">
         <span class="left-glow" id="infoLeft">
             📢 Juma Urdu Speech: 12:30
         </span>
-    </div>
+      </div>
 
-    <div id="ramadanCountdown">Loading Ramadan Countdown...</div>
+      <div id="ramadanCountdown">Loading Ramadan Countdown...</div>
 
     <div class="row">
-        <span class="right-glow" id="infoRight2">
-            📅 Welcome Ramadan: Mon, 16-Feb @ 5PM
+        <span class="right-glow" id="infoRight">
+            📅 Welcome Ramadan: Mon, 16-Feb 
         </span>
     </div>
-</div>
+  </div>
 
   <!-- ANNOUNCEMENT BAR -->
   <div id="announcement">
@@ -248,7 +246,7 @@ function updateClock() {
     const now = new Date();
     document.getElementById("clock").innerText = now.toLocaleTimeString();
 }
-setInterval(updateClock, 1000);
+setInterval(updateClock, 30000);
 updateClock();
 
 /* ===========================
@@ -298,15 +296,14 @@ function closeFullscreen() {
     else if (document.msExitFullscreen) document.msExitFullscreen();
 }
 
-/* ====================================
-   04. Auto Fullscreen After 10 Seconds
-   ==================================*/
-
+/* Auto Fullscreen After 10 Seconds */
 setTimeout(() => {
     if (!document.fullscreenElement) {
         openFullscreen();
     }
-}, 10000); // 10 seconds
+}, 10000);
+
+
 // AUTO-HIDE CONTROLS
 function showControls() {
     const controls = document.getElementById("fullscreen-controls");
@@ -333,7 +330,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* ===========================
-   05. Weather (safe)
+   04. Weather (safe)
    =========================== */
 async function loadWeather() {
   try {
@@ -393,94 +390,7 @@ async function init() {
 init(); // FIXED
 
 /* ===========================
-   06. Auto Refresh + Cache Bust (Safe)
-   =========================== */
-
-window.addEventListener("load", () => {
-    setInterval(() => {
-        const cacheBuster = "?v=" + Date.now();
-        window.location.href = window.location.pathname + cacheBuster;
-    }, 60 * 60 * 1000);
-});
-
-/* ===========================
-   07. Daily Scheduled Reload (3AM/PM)
-   =========================== */
-
-setInterval(() => {
-    const now = new Date();
-
-    // Trigger at 3:00 AM OR 3:00 PM
-    if ((now.getHours() === 3 || now.getHours() === 15) && now.getMinutes() === 0) {
-        window.location.href = window.location.pathname + "?v=" + Date.now();
-    }
-
-}, 60 * 1000); // check every minute
-
-/* ===========================
-   08. Fullscreen Watchdog
-   =========================== */
-
-setInterval(() => {
-    if (!document.fullscreenElement) {
-        openFullscreen();
-    }
-}, 2000); // check every 2 seconds
-
-/* ===========================
-   09. Heartbeat Freeze Detector
-   =========================== */
-
-let lastTick = Date.now();
-
-// Track clock updates
-setInterval(() => {
-    lastTick = Date.now();
-}, 1000); // your clock updates every second
-
-// Watchdog
-setInterval(() => {
-    if (Date.now() - lastTick > 10000) { // 10 seconds freeze
-        window.location.href = window.location.pathname + "?v=" + Date.now();
-    }
-}, 5000);
-
-/* ===========================
-   10. YouTube Iframe Crash Recovery
-   =========================== */
-
-let ytLastAlive = Date.now();
-
-// Heartbeat: ping the iframe every 5 seconds
-setInterval(() => {
-    const iframe = document.querySelector("#video-box iframe");
-
-    if (!iframe) return;
-
-    // If iframe contentWindow exists, assume it's alive
-    try {
-        if (iframe.contentWindow) {
-            ytLastAlive = Date.now();
-        }
-    } catch (e) {
-        // Cross-origin errors are normal — ignore
-    }
-}, 5000);
-
-// Watchdog: if iframe hasn't responded for 20 seconds, reload it
-setInterval(() => {
-    if (Date.now() - ytLastAlive > 20000) {
-        const iframe = document.querySelector("#video-box iframe");
-        if (iframe) {
-            const src = iframe.src;
-            iframe.src = src; // reload iframe only
-            ytLastAlive = Date.now();
-        }
-    }
-}, 7000);
-
-/* ===========================
-   11. Announcements
+   03. Announcements
    =========================== */
 
 const announcements = [
@@ -507,8 +417,7 @@ function showAnnouncement() {
 
     // Reset animation
     box.style.animation = "none";
-    void box.offsetWidth; // force reflow
-
+    
     // Apply animation
     box.style.animation = "scroll-left 20s linear forwards";
 
@@ -539,9 +448,9 @@ document.head.appendChild(style);
 
 window.onload = showAnnouncement;
 
-// ====================================
-// 12. Ramadan Countdown (Weeks & Days)
-// ====================================
+// ===============================
+// Ramadan Countdown (Weeks & Days)
+// ===============================
 
 // Set next Ramadan start date
 const ramadanStart = new Date("2026-02-17T00:00:00");
@@ -560,8 +469,8 @@ function updateRamadanCountdown() {
         return;
     }
 
-   // Total remaining days
-   const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+    // Total remaining days
+    const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
 
    // Convert to weeks & days
    const weeks = Math.floor(totalDays / 7);
@@ -589,19 +498,33 @@ function updateRamadanCountdown() {
     }, 2000);
 }
 
+/* ================================
+   STOP ANIMATIONS WHEN NOT VISIBLE
+   ============================= */
+
 // Run every 6 seconds
-setInterval(updateRamadanCountdown, 6000);
+setInterval(updateRamadanCountdown, 3000000);
 updateRamadanCountdown();
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    document.body.style.animationPlayState = "paused";
+  } else {
+    document.body.style.animationPlayState = "running";
+  }
+});
+
+/* ===========================
+   SAFETY AUTO-RELOAD (LG TV)
+   =========================== */
+
+// Reload page every 3 hours to prevent memory leak
+setTimeout(() => {
+  location.reload();
+}, 3 * 60 * 60 * 1000); // 3 hours
 
 
 </script>
 
 </body>
-
 </html>
-
-
-
-
-
-
