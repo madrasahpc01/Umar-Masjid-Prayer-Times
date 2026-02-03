@@ -99,9 +99,16 @@
     }
 
     @keyframes scroll-left {
-        from { transform: translateX(0); }
-        to { transform: translateX(-100%); }
+        from {
+            transform: translateX(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(-120%);
+            opacity: 1;
+        }
     }
+
 
     #fullscreen-controls {
         position: fixed;
@@ -389,8 +396,9 @@ async function init() {
 
 init(); // FIXED
 
+
 /* ===========================
-   03. Announcements
+   ANNOUNCEMENT BAR (FIXED)
    =========================== */
 
 const announcements = [
@@ -407,46 +415,31 @@ const announcements = [
     "👨‍👩‍👧‍👦 Next Family Circle: Date to be Announced",
     "🤲 Jazakumullahu Khairan"
 ];
-let index = 0;
 
-function showAnnouncement() {
-    const box = document.getElementById("announcementText");
+let announcementIndex = 0;
+const announcementEl = document.getElementById("announcementText");
 
-    // Set text
-    box.innerText = announcements[index];
-
-    // Reset animation
-    box.style.animation = "none";
-    
-    // Apply animation
-    box.style.animation = "scroll-left 20s linear forwards";
-
-    // Move to next announcement
-    index = (index + 1) % announcements.length;
-
-    // Pause 1 second after scroll ends
-    setTimeout(showAnnouncement, 13000);
+// Force clean animation restart (TV-safe)
+function restartAnimation(el) {
+    el.style.animation = "none";
+    el.offsetHeight; // ⚠️ forces reflow (CRITICAL)
+    el.style.animation = "scroll-left 22s linear";
 }
 
-// Animation keyframes
-const style = document.createElement("style");
-style.innerHTML = `
-@keyframes scroll-left {
-    0% {
-        transform: translateX(100%);
-        opacity: 1;
-    }
-    90% {
-        transform: translateX(-100%);
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
-}`;
-document.head.appendChild(style);
+function showNextAnnouncement() {
+    announcementEl.textContent = announcements[announcementIndex];
+    announcementEl.style.opacity = "1";
 
-window.onload = showAnnouncement;
+    restartAnimation(announcementEl);
+
+    announcementIndex = (announcementIndex + 1) % announcements.length;
+}
+
+// Run once immediately
+showNextAnnouncement();
+
+// Repeat forever (match animation duration)
+setInterval(showNextAnnouncement, 23000);
 
 // ===============================
 // Ramadan Countdown (Weeks & Days)
