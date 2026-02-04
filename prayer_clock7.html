@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mosque Display Screen</title>
+<meta name="viewport"
+      content="width=1920, height=1080, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<style>
+    body {
+        margin: 0;
+        background: #f4f4f4;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    /* HEADER */
+    #header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 30px;
+        background: #003366;
+        color: white;
+        height: 130px;
+    }
+
+    #header .logo {
+        height: 65px;
+        width: 65px;        /* Make it a square box */
+        border-radius: 50%; /* Turn it into a circle */
+        object-fit: cover;  /* Crop image nicely */
+        border: 2px solid gold;
+    }
+
+    #header .title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        flex: 1;
+        text-align: center;
+    }
+
+    #header .clock {
+        font-size: 4rem;
+        font-weight: bold;
+        margin-right: 30px;
+    }
+
+    #header .dates {
+        text-align: right;
+        font-size: 1.2rem;
+        line-height: 1.4rem;
+    }
+
+    /* MAIN CONTENT AREA */
+    #main {
+        display: flex;
+        height: 760px;
+    }
+
+    #content-box {
+        width: 33%;
+        background: #ffffff;
+        padding: 20px;
+        font-size: 1.8rem;
+        overflow: hidden;
+        border-right: 3px solid #ccc;
+    }
+
+    #video-box {
+        width: 67%;
+        background: black;
+    }
+
+    #video-box video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* ANNOUNCEMENT BAR */
+    #announcement {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 90px;
+        background: #222;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        font-size: 2.0rem;
+        font-weight: bold;
+        padding-left: 0px;
+    }
+    #announcementText {
+        white-space: nowrap;
+        display: inline-block;
+        opacity: 0;
+    }
+
+    @keyframes scroll-left {
+        from {
+            transform: translateX(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(-120%);
+            opacity: 1;
+        }
+    }
+
+
+    #fullscreen-controls {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 0.5s ease;
+    }
+
+    #fullscreen-controls.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    #fullscreen-controls button {
+        padding: 8px 14px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        background: #222;
+        color: white;
+        cursor: pointer;
+    }
+
+    #fullscreen-controls button:hover {
+        background: #444;
+    }
+
+    #info-bar {
+        width: 100%;
+        height: 90px; /* adjustable */
+        background: linear-gradient(90deg, #0a0a0a, #1a1a1a, #0a0a0a); 
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 1.8rem;
+        font-weight: 700;
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
+    }
+     
+    #ramadanCountdown {
+        opacity: 1;
+        margin: 0;
+        padding: 0;
+        white-space: nowrap;
+        transition: opacity 2.0s ease-in-out;
+        /* match info-bar height */
+        height: 8vh;
+        line-height: 6vh;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        /* Ramadan glowing pulse */
+        text-shadow:
+            0 0 10px rgba(0,255,180,0.9),
+            0 0 20px rgba(0,255,180,0.7),
+            0 0 30px rgba(0,255,180,0.5);
+
+        animation: pulseCenter 2.5s ease-in-out infinite;
+    }
+    /* ===============================
+       AMAZON FIRE TV FIX
+       =============================== */
+
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+    }
+
+    #tv-root {
+      width: 1920px;
+      height: 1080px;
+      transform-origin: top left;
+      transform: scale(1);
+    }
+
+    /* Force Silk not to zoom text */
+    * {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+
+</style>
+</head>
+
+<body>
+
+<div id="tv-root">
+
+<!-- HEADER -->
+<div id="header">
+    <img src="logo.png" class="logo" alt="Logo">
+
+    <div class="title">UMAR MASJID PRAYER TIMES</div>
+
+    <div class="clock" id="clock">00:00:00</div>
+
+    <div class="dates">
+        <div id="gregorian-date">Loading...</div>
+        <div id="hijri-date">Loading...</div>
+        <div id="weatherBox">Loading weather...</div>
+    </div>
+</div>
+
+<div id="fullscreen-controls">
+    <button onclick="toggleFullscreen()">⛶ Full Screen</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+    <div id="content-box">
+        <iframe 
+            src="PrayerTimesPanel.html" 
+            style="width:100%; height:100%; border:none; overflow:hidden;">
+        </iframe>
+    </div>
+
+
+    <div id="video-box">
+        <iframe 
+            width="100%" 
+            height="100%" 
+            src="https://www.youtube.com/embed/6a5qc9SYalw?autoplay=1&mute=1&loop=1&playlist=6a5qc9SYalw,c-xBZFSNaUQ&controls=0&modestbranding=1"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen>
+            playsinline>
+        </iframe>
+    </div>
+  </div>
+
+    <div id="info-bar">
+      <div class="row">
+        <span class="left-glow" id="infoLeft">
+            📢 Juma Urdu Speech: 12:30
+        </span>
+      </div>
+
+      <div id="ramadanCountdown">Loading Ramadan Countdown...</div>
+
+    <div class="row">
+        <span class="right-glow" id="infoRight">
+            📅 Welcome Ramadan: Mon, 16-Feb 
+        </span>
+    </div>
+  </div>
+
+  <!-- ANNOUNCEMENT BAR -->
+  <div id="announcement">
+      <div id="announcementText"></div>
+  </div>
+
+</div>
+
+<script>
+let state = {};  // FIXED
+
+/* ===========================
+   01. Digital Clock
+   =========================== */
+function updateClock() {
+    const now = new Date();
+    document.getElementById("clock").innerText = now.toLocaleTimeString();
+}
+setInterval(updateClock, 30000);
+updateClock();
+
+/* ===========================
+   02. Gregorian Date
+   =========================== */
+document.getElementById("gregorian-date").innerText =
+    new Date().toLocaleDateString("en-GB", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+/* HIJRI DATE */
+function updateHijri() {
+    const today = new Date();
+    const hijri = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    }).format(today);
+
+    document.getElementById("hijri-date").innerText = hijri;
+}
+updateHijri();
+
+/* ===========================
+   03. Full Screen
+   =========================== */
+
+let hideTimeout;
+
+// FULLSCREEN TOGGLE
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        openFullscreen();
+    } else {
+        closeFullscreen();
+    }
+}
+
+function openFullscreen() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) elem.requestFullscreen();
+    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+}
+
+function closeFullscreen() {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    else if (document.msExitFullscreen) document.msExitFullscreen();
+}
+
+/* Auto Fullscreen After 10 Seconds */
+setTimeout(() => {
+    if (!document.fullscreenElement) {
+        openFullscreen();
+    }
+}, 10000);
+
+
+// AUTO-HIDE CONTROLS
+function showControls() {
+    const controls = document.getElementById("fullscreen-controls");
+    controls.classList.remove("hidden");
+
+    clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(() => {
+        controls.classList.add("hidden");
+    }, 10000); // 10 seconds
+}
+
+// SHOW ON MOUSE MOVE
+document.addEventListener("mousemove", showControls);
+
+// INITIAL HIDE TIMER
+showControls();
+
+// KEYBOARD SHORTCUT (F11)
+document.addEventListener("keydown", (e) => {
+    if (e.key === "F11") {
+        e.preventDefault();
+        toggleFullscreen();
+    }
+});
+
+/* ===========================
+   04. Weather (safe)
+   =========================== */
+async function loadWeather() {
+  try {
+    const lat = state.coords.lat;
+    const lon = state.coords.lon;
+
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+    const data = await res.json();
+
+    const temp = data.current_weather.temperature;
+    const wind = data.current_weather.windspeed;
+    const code = data.current_weather.weathercode;
+
+    const icons = {
+      0:"☀️",1:"🌤️",2:"⛅",3:"☁️",
+      45:"🌫️",48:"🌫️",
+      51:"🌦️",53:"🌦️",55:"🌦️",
+      61:"🌧️",63:"🌧️",65:"🌧️",
+      71:"❄️",73:"❄️",75:"❄️",
+      95:"⛈️",96:"⛈️",99:"⛈️"
+    };
+
+    const icon = icons[code] || "🌤️";
+
+    let tempColor = "#22c55e";
+    if (temp <= 0) tempColor = "#3b82f6";
+    else if (temp <= 10) tempColor = "#0ea5e9";
+    else if (temp <= 20) tempColor = "#22c55e";
+    else if (temp <= 30) tempColor = "#f59e0b";
+    else tempColor = "#ef4444";
+
+    const weatherEl = document.getElementById("weatherBox");
+    if (weatherEl)
+      weatherEl.innerHTML =
+  `<div style="display:flex;align-items:center;gap:8px;font-size:18px;">
+      <span>${icon}</span>
+      <span style="font-size:16px;font-weight:600;color:${tempColor};Weather: ">${temp}°C</span>
+      <span style="font-size:14px;opacity:0.8;">💨 ${wind} km/h ⬅️ Weather</span>
+   </div>`;
+
+  } catch (err) {
+    console.error("Weather error", err);
+    const weatherEl = document.getElementById("weatherBox");
+    if (weatherEl) weatherEl.textContent = "Weather unavailable";
+  }
+}
+
+async function init() {
+  state.coords = {
+    lat: 52.47107996227851,
+    lon: -2.0349574320927606
+  };
+
+  await loadWeather();
+}
+
+init(); // FIXED
+
+
+/* ===========================
+   ANNOUNCEMENT BAR (FIXED)
+   =========================== */
+
+const announcements = [
+    "🕌 Welcome to the Umar Masjid News & Updates — Please maintain silence 🤫",
+    "📘 Madrasah Classes: Mon to Fri from 5 PM to 06:30 PM",
+    "📖 Hifz Class: Mon to Fri from 5PM to 7PM",
+    "🗓️ Weekend Madrasah: Every Saturday Morning from 11:00 AM to 01:00 PM",
+    "🌙 Ramadan Madrasah will run on Weekends only",
+    "⏰ Ramadan Madrasah timings: 13:00 to 15:30 - Only Sat & Sun",
+    "🌟 Mini Muslim: Every Sunday Morning from 11:00 AM to 12:30 PM",
+    "📚 Urdu Quran Class: For Adults, Every Mon & Fri from 07:20 to 08:30 PM",
+    "📚 English Quran Class: For Adults, Every Wed from 07:20 to 08:30 PM",
+    "👭 Sister's Circle: About Islam Every Tuesday & Sunday",
+    "👨‍👩‍👧‍👦 Next Family Circle: Date to be Announced",
+    "🤲 Jazakumullahu Khairan"
+];
+
+let announcementIndex = 0;
+const announcementEl = document.getElementById("announcementText");
+
+// Force clean animation restart (TV-safe)
+function restartAnimation(el) {
+    el.style.animation = "none";
+    el.offsetHeight; // ⚠️ forces reflow (CRITICAL)
+    el.style.animation = "scroll-left 22s linear";
+}
+
+function showNextAnnouncement() {
+    announcementEl.textContent = announcements[announcementIndex];
+    announcementEl.style.opacity = "1";
+
+    restartAnimation(announcementEl);
+
+    announcementIndex = (announcementIndex + 1) % announcements.length;
+}
+
+// Run once immediately
+showNextAnnouncement();
+
+// Repeat forever (match animation duration)
+setInterval(showNextAnnouncement, 23000);
+
+// ===============================
+// Ramadan Countdown (Weeks & Days)
+// ===============================
+
+// Set next Ramadan start date
+const ramadanStart = new Date("2026-02-17T00:00:00");
+const el = document.getElementById("ramadanCountdown");
+let isFading = false; // prevents overlapping fades
+
+function updateRamadanCountdown() {
+    if (isFading) return;
+    isFading = true;
+
+    const now = new Date();
+    let diff = ramadanStart - now;
+
+    if (diff <= 0) {
+        el.textContent = "🌙 Ramadan Mubarak!";
+        return;
+    }
+
+    // Total remaining days
+    const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+   // Convert to weeks & days
+   const weeks = Math.floor(totalDays / 7);
+   const days = totalDays % 7;
+
+   function pluralize(value, singular, plural) {
+       return value === 1 ? singular : plural;
+   }
+
+   const newText = `🌙 Ramadan: ${weeks} ${pluralize(weeks, "Week", "Weeks")} ${days} ${pluralize(days, "Day", "Days")}`;
+
+
+    // Fade out
+    el.style.opacity = 0;
+
+    // After fade-out completes, update text and fade in
+    setTimeout(() => {
+        el.innerHTML = newText;
+        el.style.opacity = 1;
+
+        setTimeout(() => {
+            isFading = false;
+        }, 1500);
+
+    }, 2000);
+}
+
+/* ================================
+   STOP ANIMATIONS WHEN NOT VISIBLE
+   ============================= */
+
+// Run every 6 seconds
+setInterval(updateRamadanCountdown, 3000000);
+updateRamadanCountdown();
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    document.body.style.animationPlayState = "paused";
+  } else {
+    document.body.style.animationPlayState = "running";
+  }
+});
+
+/* ===========================
+   SAFETY AUTO-RELOAD (LG TV)
+   =========================== */
+
+// Reload page every 3 hours to prevent memory leak
+setTimeout(() => {
+  location.reload();
+}, 3 * 60 * 60 * 1000); // 3 hours
+
+/* ===========================
+   AUTO-DETECT FIRE TV
+   =========================== */
+
+if (/Silk|AFT/.test(navigator.userAgent)) {
+  document.documentElement.style.zoom = "1";
+}
+
+
+</script>
+
+</body>
+</html>
