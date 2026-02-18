@@ -391,11 +391,6 @@
       <div id="announcementText"></div>
   </div>
 
-
-
-<script src="shared-data.js"></script>
-
-
 <script>
 let state = {};  // FIXED
 
@@ -427,23 +422,6 @@ function updateHijri() {
     document.getElementById("hijri-date").innerText = hijri;
 }
 updateHijri();
-
-/* ===========================
-   SLIDESHOW ROTATION
-=========================== */
-
-let slideIndex = 0;
-const slides = document.querySelectorAll(".slide");
-
-function showSlides() {
-    slides.forEach(slide => slide.classList.remove("active"));
-    slideIndex++;
-    if (slideIndex > slides.length) { slideIndex = 1 }
-    slides[slideIndex - 1].classList.add("active");
-}
-
-setInterval(showSlides, 10000); // Change every 10 seconds
-
 
 /* ===========================
    03. Full Screen
@@ -571,11 +549,20 @@ init(); // FIXED
    ANNOUNCEMENT BAR (FIXED)
    =========================== */
 
-
-const mosqueData = loadData();
-const announcements = mosqueData.announcements;
-
-
+const announcements = [
+    "🕌 Welcome to the Umar Masjid News & Updates — Please maintain silence 🤫",
+    "📘 Madrasah Classes: Mon to Fri from 5 PM to 06:30 PM",
+    "📖 Hifz Class: Mon to Fri from 5PM to 7PM",
+    "🗓️ Weekend Madrasah: Every Saturday Morning from 11:00 AM to 01:00 PM",
+    "🌙 Ramadan Madrasah will run on Weekends only",
+    "⏰ Ramadan Madrasah timings: 13:00 to 15:30 - Only Sat & Sun",
+    "🌟 Mini Muslim: Every Sunday Morning from 11:00 AM to 12:30 PM",
+    "📚 Urdu Quran Class: For Adults, Every Mon & Fri from 07:20 to 08:30 PM",
+    "📚 English Quran Class: For Adults, Every Wed from 07:20 to 08:30 PM",
+    "👭 Sister's Circle: About Islam Every Tuesday & Sunday",
+    "👨‍👩‍👧‍👦 Next Family Circle: Date to be Announced",
+    "🤲 Jazakumullahu Khairan"
+];
 
 let announcementIndex = 0;
 const announcementEl = document.getElementById("announcementText");
@@ -676,26 +663,6 @@ document.addEventListener("visibilitychange", () => {
 setTimeout(() => {
   location.reload();
 }, 3 * 60 * 60 * 1000); // 3 hours
-
-/* ===========================
-        AUTO-REFRESH
- =========================== */
-
-setInterval(() => {
-  const latest = loadData();
-  location.reload();
-}, 5 * 60 * 1000); // every 5 minutes
-
-/* ===========================
-        aaaassss
- =========================== */
-document.addEventListener("fullscreenchange", () => {
-  if (!document.fullscreenElement) {
-    setTimeout(() => {
-      openFullscreen();
-    }, 2000);
-  }
-});
 
 
 </script>
