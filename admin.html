@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mosque Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body {
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+  padding: 20px;
+}
+h1 { text-align: center; }
+.card {
+  max-width: 700px;
+  margin: auto;
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+}
+input, textarea, button {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+}
+button {
+  background: #22c55e;
+  font-weight: bold;
+  cursor: pointer;
+}
+#adminCard button:first-child {
+  background: #ef4444;
+  margin-bottom: 20px;
+}
+.hidden { display: none; }
+
+</style>
+</head>
+
+<body>
+
+<h1>🕌 Mosque Admin Panel</h1>
+
+<div class="card" id="loginCard">
+  <form onsubmit="login(); return false;">
+    <input type="password" id="password" placeholder="Admin Password">
+    <button type="submit">Login</button>
+  </form>
+</div>
+
+<div class="card hidden" id="adminCard">
+
+  <button onclick="logout()" style="background:#ef4444">
+    🚪 Logout
+  </button>
+
+  <h2>📢 Announcements</h2>
+  <textarea id="announcements" rows="8"></textarea>
+
+  <h2>🕌 Prayer Times</h2>
+  <input id="Fajr" placeholder="Fajr">
+  <input id="Dhuhr" placeholder="Dhuhr">
+  <input id="Asr" placeholder="Asr">
+  <input id="Maghrib" placeholder="Maghrib">
+  <input id="Isha" placeholder="Isha">
+  <input id="Khutbah" placeholder="Khutbah">
+
+  <button onclick="save()">💾 Save Changes</button>
+</div>
+
+
+<script src="shared-data.js"></script>
+
+<script>
+
+/* ===========================
+      SESSION + SECURITY
+   =========================== */
+
+let data = loadData();
+
+const SESSION_TIMEOUT = 10 * 60 * 1000;
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_TIME = 15 * 60 * 1000;
+
+/* ===== SESSION HELPERS ===== */
+function setSession() {
+  localStorage.setItem("adminLoggedIn", "true");
+  localStorage.setItem("lastActivity", Date.now());
+}
+
+function clearSession() {
+  localStorage.removeItem("adminLoggedIn");
+  localStorage.removeItem("lastActivity");
+}
+
+function isSessionValid() {
+  const loggedIn = localStorage.getItem("adminLoggedIn");
+  const last = localStorage.getItem("lastActivity");
+
+  if (!loggedIn || !last) return false;
+  if (Date.now() - last > SESSION_TIMEOUT) {
+    clearSession();
+    return false;
+  }
+  return true;
+}
+
+function updateActivity() {
+  if (localStorage.getItem("adminLoggedIn")) {
+    localStorage.setItem("lastActivity", Date.now());
+  }
+}
+
+/* ===========================
+       LOGIN (LOCKOUT)
+   =========================== */
+
+function login() {
+  const pass = document.getElementById("password").value;
+
+  const attempts = Number(localStorage.getItem("loginAttempts")) || 0;
+  const lockUntil = Number(localStorage.getItem("lockUntil")) || 0;
+
+  if (Date.now() < lockUntil) {
+    alert("Admin locked. Try again later.");
+    return;
+  }
+
+  if (pass === data.password) {
+    localStorage.removeItem("loginAttempts");
+    localStorage.removeItem("lockUntil");
+
+    setSession();
+
+    document.getElementById("loginCard").classList.add("hidden");
+    document.getElementById("adminCard").classList.remove("hidden");
+    loadForm();
+  } else {
+    const newAttempts = attempts + 1;
+    localStorage.setItem("loginAttempts", newAttempts);
+
+    if (newAttempts >= MAX_ATTEMPTS) {
+      localStorage.setItem("lockUntil", Date.now() + LOCKOUT_TIME);
+      alert("Too many attempts. Locked for 15 minutes.");
+    } else {
+      alert(`Wrong password (${newAttempts}/${MAX_ATTEMPTS})`);
+    }
+  }
+}
+
+/* ===========================
+       ADMIN LOGIC
+   =========================== */
+
+function loadForm() {
+  document.getElementById("announcements").value =
+    data.announcements.join("\n");
+
+  for (let k in data.prayerTimes) {
+    document.getElementById(k).value = data.prayerTimes[k];
+  }
+}
+
+function save() {
+  data.announcements =
+    document.getElementById("announcements").value
+      .split("\n")
+      .filter(x => x.trim());
+
+  for (let k in data.prayerTimes) {
+    data.prayerTimes[k] = document.getElementById(k).value;
+  }
+
+  saveData(data);
+  alert("Saved successfully");
+}
+
+/* ===========================
+       LOGOUT
+   =========================== */
+
+function logout() {
+  clearSession();
+  document.getElementById("adminCard").classList.add("hidden");
+  document.getElementById("loginCard").classList.remove("hidden");
+}
+
+/* ===========================
+     RESTORE + TIMEOUT
+   =========================== */
+
+if (isSessionValid()) {
+  document.getElementById("loginCard").classList.add("hidden");
+  document.getElementById("adminCard").classList.remove("hidden");
+  loadForm();
+}
+
+["click","keydown","mousemove","touchstart"].forEach(evt =>
+  document.addEventListener(evt, updateActivity)
+);
+
+setInterval(() => {
+  if (!isSessionValid()) {
+    logout();
+    alert("Session expired.");
+  }
+}, 60000);
+
+</script>
+
+
+
+</body>
+</html>
