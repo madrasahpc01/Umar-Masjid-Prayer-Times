@@ -19,14 +19,14 @@
         align-items: center;
         justify-content: space-between;
         padding: 10px 30px;
-        background: #003366;
+        background: #006655;
         color: white;
         height: 12vh;
     }
 
     #header .logo {
-        height: 65px;
-        width: 65px;        /* Make it a square box */
+        height: 70px;
+        width: 70px;        /* Make it a square box */
         border-radius: 50%; /* Turn it into a circle */
         object-fit: cover;  /* Crop image nicely */
         border: 2px solid gold;
@@ -39,6 +39,30 @@
         text-align: center;
     }
 
+    /* Title + tagline stacked */
+    .masjid-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    /* Main title */
+    .masjid-text h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      flex: 1;
+      text-align: center;
+      color: var(--primary);
+      margin: 0;
+    }
+    /* Tagline */
+    .masjid-text .tagline {
+      font-size: 1.0rem;
+      text-align: center;
+      color: var(--dark);
+      opacity: 0.8;
+      margin-top: 3px;
+    }
     #header .clock {
         font-size: 4rem;
         font-weight: bold;
@@ -77,55 +101,55 @@
         object-fit: cover;
     }
 
-#slideshow {
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
+    #slideshow {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
 
-.slide {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 1.5s ease-in-out;
-}
+    .slide {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out;
+    }
 
-.slide.active {
-    opacity: 1;
-}
+    .slide.active {
+        opacity: 1;
+    }
 
-.slide-content {
-    background: rgba(0, 0, 0, 0.6);
-    padding: 40px;
-    border-radius: 15px;
-    text-align: center;
-    color: white;
-    max-width: 70%;
-}
+    .slide-content {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        color: white;
+        max-width: 70%;
+    }
 
-.slide-content h2 {
-    font-size: 3rem;
-    margin-bottom: 20px;
-    color: gold;
-}
+    .slide-content h2 {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        color: gold;
+    }
 
-.slide-content .verse {
-    font-size: 2.2rem;
-    font-style: italic;
-    margin-bottom: 20px;
-}
+    .slide-content .verse {
+        font-size: 2.2rem;
+        font-style: italic;
+        margin-bottom: 20px;
+    }
 
-.slide-content ul {
-    list-style-type: disc;
-    font-size: 1.8rem;
-    text-align: left;
-}
+    .slide-content ul {
+        list-style-type: disc;
+        font-size: 1.8rem;
+        text-align: left;
+    }
 
     /* ANNOUNCEMENT BAR */
     #announcement {
@@ -226,15 +250,22 @@
     }
 
 </style>
+
+
 </head>
 
 <body>
 
 <!-- HEADER -->
 <div id="header">
-    <img src="logo.png" class="logo" alt="Logo">
+    <a href="index.html">
+        <img src="logo.png" class="logo" alt="Logo">
+    </a>
 
-    <div class="title">UMAR MASJID PRAYER TIMES</div>
+    <div class="masjid-text">
+      <h1>UMAR MASJID PRAYER TIMES</h1>
+      <p class="tagline">Serving the community with faith, education, and unity</p>
+    </div>
 
     <div class="clock" id="clock">00:00:00</div>
 
@@ -258,7 +289,8 @@
         </iframe>
     </div>
 
-<div id="video-box">
+
+    <div id="video-box">
     <div id="slideshow">
 
         <div class="slide active" style="background-image:url('slide1.jpg')">
@@ -312,23 +344,23 @@
             </div>
         </div>
 
-<div class="slide" style="background-image:url('slide5.jpg')">
-    <div class="slide-content">
-        <h2>🤲 Patience & Gratitude</h2>
-        <p class="verse">
-            “Indeed, Allah is with the patient.”
-        </p>
-        <ul>
-            <li>Practice Sabr daily</li>
-            <li>Make Shukr after every Salah</li>
-            <li>Control anger & speech</li>
-        </ul>
-    </div>
-</div>
+        <div class="slide" style="background-image:url('slide5.jpg')">
+            <div class="slide-content">
+                <h2>🤲 Patience & Gratitude</h2>
+                <p class="verse">
+                    “Indeed, Allah is with the patient.”
+                </p>
+                <ul>
+                <li>Practice Sabr daily</li>
+                <li>Make Shukr after every Salah</li>
+                <li>Control anger & speech</li>
+            </ul>
+        </div>
+    </div>  
 
 
-<div class="slide" style="background-image:url('slide6.jpg')">
-</div>
+        <div class="slide" style="background-image:url('slide6.jpg')">
+        </div>
 
 
     </div>
@@ -349,7 +381,7 @@
 
     <div class="row">
         <span class="right-glow" id="infoRight">
-            📅 Welcome Ramadan: Mon, 16-Feb 
+            💛 Fitrana: £6 Per Person 
         </span>
     </div>
   </div>
@@ -358,6 +390,7 @@
   <div id="announcement">
       <div id="announcementText"></div>
   </div>
+
 
 
 <script src="shared-data.js"></script>
