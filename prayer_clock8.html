@@ -439,69 +439,86 @@ function showSlides() {
 
 setInterval(showSlides, 10000); // Change every 10 seconds
 
-
-    
 /* ===========================
-   03. Full Screen
+   03. Full Screen (Hybrid)
    =========================== */
+
+const fsToggle = document.getElementById("fsToggle");
+const fsIcon = document.getElementById("fsIcon");
+const controls = document.getElementById("fullscreen-controls");
 
 let hideTimeout;
 
-// FULLSCREEN TOGGLE
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        openFullscreen();
-    } else {
-        closeFullscreen();
-    }
-}
-
-function openFullscreen() {
+/* FULLSCREEN TOGGLE */
+function goFullscreen() {
     const elem = document.documentElement;
+
     if (elem.requestFullscreen) elem.requestFullscreen();
     else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
     else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+
+    fsIcon.textContent = "✖"; 
+    autoHideControls();
 }
 
-function closeFullscreen() {
+function exitFullscreen() {
     if (document.exitFullscreen) document.exitFullscreen();
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     else if (document.msExitFullscreen) document.msExitFullscreen();
+
+    fsIcon.textContent = "⛶";
+    showControls();
 }
 
-/* Auto Fullscreen After 10 Seconds */
+function toggleFullscreen() {
+    !document.fullscreenElement ? goFullscreen() : exitFullscreen();
+}
+
+/* AUTO FULLSCREEN AFTER 10 SECONDS */
 setTimeout(() => {
-    if (!document.fullscreenElement) {
-        openFullscreen();
-    }
+    if (!document.fullscreenElement) goFullscreen();
 }, 10000);
 
+/* AUTO RE-ENTER FULLSCREEN IF USER EXITS */
+document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
+        showControls();
+        fsIcon.textContent = "⛶";
 
-// AUTO-HIDE CONTROLS
+        setTimeout(() => {
+            if (!document.fullscreenElement) goFullscreen();
+        }, 2000);
+    }
+});
+
+/* AUTO-HIDE CONTROLS */
 function showControls() {
-    const controls = document.getElementById("fullscreen-controls");
     controls.classList.remove("hidden");
-
     clearTimeout(hideTimeout);
+
     hideTimeout = setTimeout(() => {
         controls.classList.add("hidden");
-    }, 10000); // 10 seconds
+    }, 5000);
 }
 
-// SHOW ON MOUSE MOVE
+function autoHideControls() {
+    showControls();
+}
+
+/* SHOW CONTROLS ON MOUSE MOVE */
 document.addEventListener("mousemove", showControls);
 
-// INITIAL HIDE TIMER
+/* INITIAL HIDE */
 showControls();
 
-// KEYBOARD SHORTCUT (F11)
+/* F11 OVERRIDE */
 document.addEventListener("keydown", (e) => {
     if (e.key === "F11") {
         e.preventDefault();
         toggleFullscreen();
     }
 });
-
+    
 /* ===========================
    04. Weather (safe)
    =========================== */
@@ -685,5 +702,6 @@ setTimeout(() => {
 
 </body>
 </html>
+
 
 
