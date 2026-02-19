@@ -249,6 +249,27 @@
         animation: pulseCenter 2.5s ease-in-out infinite;
     }
 
+/* GLOW STYLES */
+.suhoor-glow {
+    color: #3b82f6; /* blue */
+    text-shadow: 0 0 12px rgba(59,130,246,0.8);
+}
+
+.iftar-glow {
+    color: #f97316; /* orange */
+    text-shadow: 0 0 12px rgba(249,115,22,0.8);
+}
+
+/* FLASHING ALERT */
+.flash-alert {
+    animation: flash 1s infinite alternate;
+}
+
+@keyframes flash {
+    from { opacity: 1; }
+    to { opacity: 0.3; }
+}
+
 </style>
 
 
@@ -293,7 +314,7 @@
     <div id="video-box">
     <div id="slideshow">
 
-        <div class="slide active" style="background-image:url('slide1.jpg')">
+        <div class="slide active" style="background-image:url('slide1.png')">
             <div class="slide-content">
                 <h2>🌙 Ramadan Kareem</h2>
                 <p class="verse">يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ كُتِبَ عَلَيْكُمُ ٱلصِّيَامُ كَمَا كُتِبَ عَلَى ٱلَّذِينَ مِن قَبْلِكُمْ لَعَلَّكُمْ تَتَّقُونَ</p>
@@ -306,7 +327,7 @@
             </div>
         </div>
 
-        <div class="slide" style="background-image:url('slide2.jpg')">
+        <div class="slide" style="background-image:url('slide2.png')">
             <div class="slide-content">
                 <h2>⭐ Importance of Ramadan</h2>
                 <p class="verse">شَهْرُ رَمَضَانَ ٱلَّذِىٓ أُنزِلَ فِيهِ ٱلْقُرْءَانُ هُدًۭى لِّلنَّاسِ وَبَيِّنَـٰتٍۢ مِّنَ ٱلْهُدَىٰ وَٱلْفُرْقَانِ ۚ</p>
@@ -318,7 +339,7 @@
             </div>
         </div>
 
-        <div class="slide" style="background-image:url('slide3.jpg')">
+        <div class="slide" style="background-image:url('slide3.png')">
             <div class="slide-content">
                 <h2>🕌 The Month of Mercy</h2>
                 <p class="verse"> عَنْ أَبِي هُرَيْرَةَ، - رضى الله عنه - أَنَّ رَسُولَ اللَّهِ صلى الله عليه وسلم قَالَ ‏ "‏ إِذَا جَاءَ رَمَضَانُ فُتِّحَتْ أَبْوَابُ الْجَنَّةِ وَغُلِّقَتْ أَبْوَابُ النَّارِ وَصُفِّدَتِ الشَّيَاطِينُ ‏"‏ ‏.‏
@@ -332,19 +353,20 @@
             </div>
         </div>
 
-        <div class="slide" style="background-image:url('slide4.jpg')">
+        <div class="slide" style="background-image:url('slide4.png')">
             <div class="slide-content">
-                <h2>📖 Laylatul Qadr</h2>
-                <p class="verse">"Better than a thousand months"</p>
+                <h2>🚪🚪 Special Gate - Ar Raiyan</h2>
+                <p class="verse"> إِنَّ فِي الْجَنَّةِ بَابًا ، يُقَالُ لَهُ : الرَّيَّانُ ، يَدْخُلُ مِنْهُ الصَّائِمُونَ يَوْمَ الْقِيَامَةِ ، لَا يَدْخُلُ مِنْهُ أَحَدٌ غَيْرُهُمْ ، يُقَالُ : أَيْنَ الصَّائِمُونَ ؟ فَيَقُومُونَ ، لَا يَدْخُلُ مِنْهُ أَحَدٌ غَيْرُهُمْ ، فَإِذَا دَخَلُوا أُغْلِقَ ، فَلَمْ يَدْخُلْ مِنْهُ أَحَدٌ</p>
                 <ul>
-                    <li>Pray Tahajjud</li>
-                    <li>Make Dua for Ummah</li>
-                    <li>Seek forgiveness</li>
+                    <li>TThere is a gate in Paradise called Ar-Raiyan</li>
+                    <li>Those who observe fasts will enter through it on the Day of Resurrection and none except them will enter through it.'</li>
+                    <li>After their entry the gate will be closed</li>
                 </ul>
+                <h1>📖 Sahih Bukhari — 1896 & Muslim — 1152</h1>
             </div>
         </div>
 
-        <div class="slide" style="background-image:url('slide5.jpg')">
+        <div class="slide" style="background-image:url('slide5.png')">
             <div class="slide-content">
                 <h2>🤲 Patience & Gratitude</h2>
                 <p class="verse">
@@ -358,6 +380,17 @@
         </div>
     </div>  
 
+        <div class="slide" style="background-image:url('slide4.png')">
+            <div class="slide-content">
+                <h2>📖 Laylatul Qadr</h2>
+                <p class="verse">"Better than a thousand months"</p>
+                <ul>
+                    <li>Pray Tahajjud</li>
+                    <li>Make Dua for Ummah</li>
+                    <li>Seek forgiveness</li>
+                </ul>
+            </div>
+        </div>
 
         <div class="slide" style="background-image:url('slide6.jpg')">
         </div>
@@ -377,7 +410,9 @@
         </span>
       </div>
 
-      <div id="ramadanCountdown">Loading Ramadan Countdown...</div>
+      <div id="suhoorIftarBox" style="font-size:1.8rem; font-weight:700; text-align:center;">
+          Loading Suhoor & Iftar...
+      </div>
 
     <div class="row">
         <span class="right-glow" id="infoRight">
@@ -518,7 +553,86 @@ document.addEventListener("keydown", (e) => {
         toggleFullscreen();
     }
 });
-    
+
+
+/* ===========================
+   RAMADAN SUHOOR & IFTAR TIMES
+   =========================== */
+
+const ramadanTimes = {
+  1:  { suhoor: "05:40", iftar: "17:30" },
+  2:  { suhoor: "05:38", iftar: "17:32" },
+  3:  { suhoor: "05:36", iftar: "17:34" },
+  4:  { suhoor: "05:34", iftar: "17:36" },
+  5:  { suhoor: "05:32", iftar: "17:38" },
+  6:  { suhoor: "05:30", iftar: "17:40" },
+  7:  { suhoor: "05:28", iftar: "17:42" },
+  8:  { suhoor: "05:26", iftar: "17:43" },
+  9:  { suhoor: "05:24", iftar: "17:45" },
+  10: { suhoor: "05:22", iftar: "17:47" },
+  11: { suhoor: "05:20", iftar: "17:49" },
+  12: { suhoor: "05:17", iftar: "17:51" },
+  13: { suhoor: "05:15", iftar: "17:53" },
+  14: { suhoor: "05:13", iftar: "17:55" },
+  15: { suhoor: "05:11", iftar: "17:56" },
+  16: { suhoor: "05:08", iftar: "17:58" },
+  17: { suhoor: "05:06", iftar: "18:00" },
+  18: { suhoor: "05:04", iftar: "18:02" },
+  19: { suhoor: "05:01", iftar: "18:04" },
+  20: { suhoor: "04:59", iftar: "18:05" },
+  21: { suhoor: "04:57", iftar: "18:07" },
+  22: { suhoor: "04:56", iftar: "18:07" },
+  23: { suhoor: "04:55", iftar: "18:09" },
+  24: { suhoor: "04:50", iftar: "18:13" },
+  25: { suhoor: "04:48", iftar: "18:14" },
+  26: { suhoor: "04:46", iftar: "18:16" },
+  27: { suhoor: "04:43", iftar: "18:18" },
+  28: { suhoor: "04:41", iftar: "18:20" },
+  29: { suhoor: "04:38", iftar: "18:21" },
+  30: { suhoor: "04:36", iftar: "18:23" }
+};
+
+/* ===========================
+   UPDATE SUHOOR & IFTAR (NO COUNTDOWN)
+   =========================== */
+
+function updateSuhoorIftar() {
+    const today = new Date();
+    const ramadanDay = getRamadanDay(today);
+    const box = document.getElementById("suhoorIftarBox");
+
+    if (!ramadanDay || !ramadanTimes[ramadanDay]) {
+        box.innerHTML = "🌙 Ramadan timetable not active";
+        return;
+    }
+
+    const { suhoor, iftar } = ramadanTimes[ramadanDay];
+
+    box.innerHTML = `
+        <span style="color:#3b82f6; text-shadow:0 0 10px rgba(59,130,246,0.7);">
+            🌙 Suhoor Ends: <strong>${suhoor}</strong>
+        </span>
+        &nbsp;&nbsp; | &nbsp;&nbsp;
+        <span style="color:#f97316; text-shadow:0 0 10px rgba(249,115,22,0.7);">
+            🌅 Iftar: <strong>${iftar}</strong>
+        </span>
+    `;
+}
+
+/* Ramadan start date */
+function getRamadanDay(date) {
+    const ramadanStart = new Date("2026-02-18"); // 1 Ramadan 2026
+    const diff = date - ramadanStart;
+
+    if (diff < 0) return null;
+
+    const day = Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
+
+    return day >= 1 && day <= 30 ? day : null;
+}
+
+updateSuhoorIftar();
+
 /* ===========================
    04. Weather (safe)
    =========================== */
@@ -702,6 +816,3 @@ setTimeout(() => {
 
 </body>
 </html>
-
-
-
