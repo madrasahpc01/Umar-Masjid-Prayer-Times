@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mosque Display Screen</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body {
+        margin: 0;
+        background: #f4f4f4;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    /* HEADER */
+    #header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 30px;
+        background: #003366;
+        color: white;
+        height: 12vh;
+    }
+
+    #header .logo {
+        height: 70px;
+        width: 70px;        /* Make it a square box */
+        border-radius: 50%; /* Turn it into a circle */
+        object-fit: cover;  /* Crop image nicely */
+        border: 2px solid gold;
+    }
+
+    #header .title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        flex: 1;
+        text-align: center;
+    }
+
+    /* Title + tagline stacked */
+    .masjid-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    /* Main title */
+    .masjid-text h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      flex: 1;
+      text-align: center;
+      color: var(--primary);
+      margin: 0;
+    }
+    /* Tagline */
+    .masjid-text .tagline {
+      font-size: 1.0rem;
+      text-align: center;
+      color: var(--dark);
+      opacity: 0.8;
+      margin-top: 3px;
+    }
+    #header .clock {
+        font-size: 4rem;
+        font-weight: bold;
+        margin-right: 30px;
+    }
+
+    #header .dates {
+        text-align: right;
+        font-size: 1.2rem;
+        line-height: 1.4rem;
+    }
+
+    /* MAIN CONTENT AREA */
+    #main {
+        display: flex;
+        height: 70vh;
+    }
+
+    #content-box {
+        width: 33%;
+        background: #ffffff;
+        padding: 20px;
+        font-size: 1.8rem;
+        overflow: hidden;
+        border-right: 3px solid #ccc;
+    }
+
+    #video-box {
+        width: 67%;
+        background: black;
+    }
+
+    #video-box video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    #slideshow {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    .slide {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out;
+    }
+
+    .slide.active {
+        opacity: 1;
+    }
+
+    .slide-content {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        color: white;
+        max-width: 70%;
+    }
+
+    .slide-content h2 {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        color: gold;
+    }
+
+    .slide-content .verse {
+        font-size: 3rem;
+        font-style: italic;
+        margin-bottom: 20px;
+        color: Purple;
+    }
+
+    .slide-content ul {
+        list-style-type: disc;
+        font-size: 1.8rem;
+        text-align: left;
+    }
+
+    /* ANNOUNCEMENT BAR */
+    #announcement {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 8vh;
+        background: #222;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        font-size: 2.0rem;
+        font-weight: bold;
+        padding-left: 0px;
+    }
+    #announcementText {
+        white-space: nowrap;
+        display: inline-block;
+        opacity: 0;
+    }
+
+    @keyframes scroll-left {
+        from {
+            transform: translateX(100%);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(-120%);
+            opacity: 1;
+        }
+    }
+
+
+    #fullscreen-controls {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 0.5s ease;
+    }
+
+    #fullscreen-controls.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    #fullscreen-controls button {
+        padding: 8px 14px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        background: #222;
+        color: white;
+        cursor: pointer;
+    }
+
+    #fullscreen-controls button:hover {
+        background: #444;
+    }
+
+    #info-bar {
+        width: 100%;
+        height: 8vh; /* adjustable */
+        background: linear-gradient(90deg, #0a0a0a, #1a1a1a, #0a0a0a); 
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 1.8rem;
+        font-weight: 700;
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
+    }
+     
+    #ramadanCountdown {
+        opacity: 1;
+        margin: 0;
+        padding: 0;
+        white-space: nowrap;
+        transition: opacity 2.0s ease-in-out;
+        /* match info-bar height */
+        height: 8vh;
+        line-height: 6vh;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        /* Ramadan glowing pulse */
+        text-shadow:
+            0 0 10px rgba(0,255,180,0.9),
+            0 0 20px rgba(0,255,180,0.7),
+            0 0 30px rgba(0,255,180,0.5);
+
+        animation: pulseCenter 2.5s ease-in-out infinite;
+    }
+
+/* GLOW STYLES */
+.suhoor-glow {
+    color: #3b82f6; /* blue */
+    text-shadow: 0 0 12px rgba(59,130,246,0.8);
+}
+
+.iftar-glow {
+    color: #f97316; /* orange */
+    text-shadow: 0 0 12px rgba(249,115,22,0.8);
+}
+
+/* FLASHING ALERT */
+.flash-alert {
+    animation: flash 1s infinite alternate;
+}
+
+@keyframes flash {
+    from { opacity: 1; }
+    to { opacity: 0.3; }
+}
+
+</style>
+
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div id="header">
+    <a href="index.html">
+        <img src="logo.png" class="logo" alt="Logo">
+    </a>
+
+    <div class="masjid-text">
+      <h1>UMAR MASJID PRAYER TIMES</h1>
+      <p class="tagline">Serving the community with faith, education, and unity</p>
+    </div>
+
+    <div class="clock" id="clock">00:00:00</div>
+
+    <div class="dates">
+        <div id="gregorian-date">Loading...</div>
+        <div id="hijri-date">Loading...</div>
+        <div id="weatherBox">Loading weather...</div>
+    </div>
+</div>
+
+<div id="fullscreen-controls">
+    <button onclick="toggleFullscreen()">⛶ Full Screen</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+    <div id="content-box">
+        <iframe 
+            src="PrayerTimesPanel.html" 
+            style="width:100%; height:100%; border:none; overflow:hidden;">
+        </iframe>
+    </div>
+
+
+    <div id="video-box">
+    <div id="slideshow">
+
+        <div class="slide active" style="background-image:url('slide1.jpg')">
+            <div class="slide-content">
+                <h2>🌙 Fasting Six Days of Shawwāl</h2>
+                <p class="verse">‏مَنْ صَامَ رَمَضَانَ ثُمَّ أَتْبَعَهُ سِتًّا مِنْ شَوَّالٍ كَانَ كَصِيَامِ الدَّهْرِ‏</p>
+                <ul>
+                    <li>The Prophet ﷺ said:</li>
+                    <li>“Whoever fasts Ramadan and then follows it with six days of Shawwāl, it is as if he fasted for a lifetime.”</li>
+                </ul>
+                <h1>📖 Sahih Muslim # 1164</h1>
+            </div>
+        </div>
+
+        <div class="slide" style="background-image:url('slide2.jpg')">
+            <div class="slide-content">
+                <h2>🕌 Calculation & Explanation</h2>
+                <h1>Quran:</h1>
+                <p class="verse">مَن جَآءَ بِٱلْحَسَنَةِ فَلَهُۥ عَشْرُ أَمْثَالِهَا ۖ وَمَن جَآءَ بِٱلسَّيِّئَةِ فَلَا يُجْزَىٰٓ إِلَّا مِثْلَهَا وَهُمْ لَا يُظْلَمُونَ</p>
+                <ul>
+                    <li>Whoever comes with a good deed will be rewarded tenfold.</li>
+                    <li>But whoever comes with a bad deed will be punished for only one.</li>
+                    <li>None will be wronged.</li>
+                </ul>
+                <h1>📖 Surah Al An'am - Verse # 160</h1>
+            </div>
+        </div>
+
+        <div class="slide" style="background-image:url('slide3.jpg')">
+            <div class="slide-content">
+                <h2>🌙 Total Days in Islamic (Hijri) calendar</h2>
+                <p class="verse">The Islamic (Hijri) calendar is a lunar calendar, and its total number of days depends on the year:</p>
+                <h1>354 days in a normal year & 355 days in a leap year</h1>
+                <ul>
+                    <li>Ramadan = 30 days × 10 reward = 300 days</li>
+                    <li>6 days of Shawwāl × 10 reward = 60 days</li>
+                    <li>Total = 360 days (≈ a full year)</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+  </div>
+    
+  </div>
+
+    <div id="info-bar">
+      <div class="row">
+        <span class="left-glow" id="infoLeft">
+            📢 Friday: Urdu Speech at 12:30
+        </span>
+      </div>
+
+      <div id="islamicCountdown" style="transition: opacity 2.5s;"></div>
+
+    <div class="row">
+        <span class="right-glow" id="infoRight">
+            📢 Friday: Khutbah at 13:00
+        </span>
+    </div>
+  </div>
+
+  <!-- ANNOUNCEMENT BAR -->
+  <div id="announcement">
+      <div id="announcementText"></div>
+  </div>
+
+<script>
+let state = {};  // FIXED
+
+/* ===========================
+   01. Digital Clock
+   =========================== */
+function updateClock() {
+    const now = new Date();
+    document.getElementById("clock").innerText = now.toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ===========================
+   02. Gregorian Date
+   =========================== */
+document.getElementById("gregorian-date").innerText =
+    new Date().toLocaleDateString("en-GB", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+/* HIJRI DATE */
+function updateHijri() {
+    const today = new Date();
+    const hijri = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    }).format(today);
+
+    document.getElementById("hijri-date").innerText = hijri;
+}
+updateHijri();
+
+/* ===========================
+   SLIDESHOW ROTATION
+=========================== */
+
+let slideIndex = 0;
+const slides = document.querySelectorAll(".slide");
+
+function showSlides() {
+    slides.forEach(slide => slide.classList.remove("active"));
+    slideIndex++;
+    if (slideIndex > slides.length) { slideIndex = 1 }
+    slides[slideIndex - 1].classList.add("active");
+}
+
+setInterval(showSlides, 15000); // Change every 10 seconds
+
+/* ===========================
+   03. Full Screen (Hybrid)
+   =========================== */
+
+const fsToggle = document.getElementById("fsToggle");
+const fsIcon = document.getElementById("fsIcon");
+const controls = document.getElementById("fullscreen-controls");
+
+let hideTimeout;
+
+/* FULLSCREEN TOGGLE */
+function goFullscreen() {
+    const elem = document.documentElement;
+
+    if (elem.requestFullscreen) elem.requestFullscreen();
+    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+
+    fsIcon.textContent = "✖"; 
+    autoHideControls();
+}
+
+function exitFullscreen() {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    else if (document.msExitFullscreen) document.msExitFullscreen();
+
+    fsIcon.textContent = "⛶";
+    showControls();
+}
+
+function toggleFullscreen() {
+    !document.fullscreenElement ? goFullscreen() : exitFullscreen();
+}
+
+/* AUTO FULLSCREEN AFTER 10 SECONDS */
+setTimeout(() => {
+    if (!document.fullscreenElement) goFullscreen();
+}, 10000);
+
+/* AUTO RE-ENTER FULLSCREEN IF USER EXITS */
+document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
+        showControls();
+        fsIcon.textContent = "⛶";
+
+        setTimeout(() => {
+            if (!document.fullscreenElement) goFullscreen();
+        }, 2000);
+    }
+});
+
+/* AUTO-HIDE CONTROLS */
+function showControls() {
+    controls.classList.remove("hidden");
+    clearTimeout(hideTimeout);
+
+    hideTimeout = setTimeout(() => {
+        controls.classList.add("hidden");
+    }, 5000);
+}
+
+function autoHideControls() {
+    showControls();
+}
+
+/* SHOW CONTROLS ON MOUSE MOVE */
+document.addEventListener("mousemove", showControls);
+
+/* INITIAL HIDE */
+showControls();
+
+/* F11 OVERRIDE */
+document.addEventListener("keydown", (e) => {
+    if (e.key === "F11") {
+        e.preventDefault();
+        toggleFullscreen();
+    }
+});
+
+
+/* ===========================
+   04. Weather (safe)
+   =========================== */
+async function loadWeather() {
+  try {
+    const lat = state.coords.lat;
+    const lon = state.coords.lon;
+
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+    const data = await res.json();
+
+    const temp = data.current_weather.temperature;
+    const wind = data.current_weather.windspeed;
+    const code = data.current_weather.weathercode;
+
+    const icons = {
+      0:"☀️",1:"🌤️",2:"⛅",3:"☁️",
+      45:"🌫️",48:"🌫️",
+      51:"🌦️",53:"🌦️",55:"🌦️",
+      61:"🌧️",63:"🌧️",65:"🌧️",
+      71:"❄️",73:"❄️",75:"❄️",
+      95:"⛈️",96:"⛈️",99:"⛈️"
+    };
+
+    const icon = icons[code] || "🌤️";
+
+    let tempColor = "#22c55e";
+    if (temp <= 0) tempColor = "#3b82f6";
+    else if (temp <= 10) tempColor = "#0ea5e9";
+    else if (temp <= 20) tempColor = "#22c55e";
+    else if (temp <= 30) tempColor = "#f59e0b";
+    else tempColor = "#ef4444";
+
+    const weatherEl = document.getElementById("weatherBox");
+    if (weatherEl)
+      weatherEl.innerHTML =
+  `<div style="display:flex;align-items:center;gap:8px;font-size:18px;">
+      <span>${icon}</span>
+      <span style="font-size:16px;font-weight:600;color:${tempColor};">🌡️ ${temp}°C</span>
+      <span style="font-size:14px;opacity:0.8;">💨 ${wind} km/h ⬅️ Weather</span>
+   </div>`;
+
+  } catch (err) {
+    console.error("Weather error", err);
+    const weatherEl = document.getElementById("weatherBox");
+    if (weatherEl) weatherEl.textContent = "Weather unavailable";
+  }
+}
+
+async function init() {
+  state.coords = {
+    lat: 52.47107996227851,
+    lon: -2.0349574320927606
+  };
+
+  await loadWeather();
+}
+
+init(); // FIXED
+
+
+/* ===========================
+   ANNOUNCEMENT BAR (FIXED)
+   =========================== */
+
+const announcements = [
+    "🕌 Welcome to the Umar Masjid News & Updates — Please maintain silence 🤫",
+    "📘 Madrasah Timings: Mon to Fri from 5 PM to 06:30 PM",
+    "📖 Hifz Class: Mon to Fri from 5PM to 7PM",
+    "🗓️ Weekend Madrasah: Every Saturday Morning from 11:00 AM to 01:00 PM",
+    "🌟 Mini Muslim: Every Sunday Morning from 11:00 AM to 12:30 PM",
+    "📚 Urdu Quran Class: For Adults, Every Mon & Fri from 07:00 to 08:00 PM",
+    "📚 English Quran Class: For Adults, Every Wed from 07:00 to 08:00 PM",
+    "👭 Sister's Circle: About Islam Every Tuesday & Sunday",
+    "🛒 Food Bank: Last Saturday of each month at 11:00 AM",
+    "🤲 Jazakumullahu Khairan"
+];
+
+let announcementIndex = 0;
+const announcementEl = document.getElementById("announcementText");
+
+// Force clean animation restart (TV-safe)
+function restartAnimation(el) {
+    el.style.animation = "none";
+    el.offsetHeight; // ⚠️ forces reflow (CRITICAL)
+    el.style.animation = "scroll-left 22s linear";
+}
+
+function showNextAnnouncement() {
+    announcementEl.textContent = announcements[announcementIndex];
+    announcementEl.style.opacity = "1";
+
+    restartAnimation(announcementEl);
+
+    announcementIndex = (announcementIndex + 1) % announcements.length;
+}
+
+// Run once immediately
+showNextAnnouncement();
+
+// Repeat forever (match animation duration)
+setInterval(showNextAnnouncement, 23000);
+
+// ===============================
+// Smart Islamic Countdown Widget
+// ===============================
+
+const el = document.getElementById("islamicCountdown");
+let isFading = false;
+
+// ===============================
+// 📅 Key Islamic Dates (ESTIMATED)
+// Update yearly or replace with API later
+// ===============================
+const events = [
+    {
+        name: "Ramadan",
+        icon: "🌙",
+        date: new Date("2027-02-06T00:00:00"),
+        message: "Ramadan Mubarak!"
+    },
+    {
+        name: "Eid al-Fitr",
+        icon: "🎉",
+        date: new Date("2026-03-19T00:00:00"),
+        message: "Eid Mubarak!"
+    },
+    {
+        name: "Hajj",
+        icon: "🕋",
+        date: new Date("2026-05-26T00:00:00"),
+        message: "Hajj Mubarak!"
+    },
+    {
+        name: "Eid al-Adha",
+        icon: "🎉",
+        date: new Date("2026-05-28T00:00:00"),
+        message: "Eid al-Adha Mubarak!"
+    }
+];
+
+// ===============================
+// 🔍 Get Next Upcoming Event
+// ===============================
+function getNextEvent() {
+    const now = new Date();
+
+    // Sort events by soonest
+    const upcoming = events
+        .map(e => ({ ...e, diff: e.date - now }))
+        .filter(e => e.diff > 0)
+        .sort((a, b) => a.diff - b.diff);
+
+    return upcoming.length ? upcoming[0] : null;
+}
+
+// ===============================
+// 🔢 Plural helper
+// ===============================
+function pluralize(value, singular, plural) {
+    return value === 1 ? singular : plural;
+}
+
+// ===============================
+// 🔄 Update Countdown
+// ===============================
+function updateCountdown() {
+    if (isFading) return;
+    isFading = true;
+
+    const event = getNextEvent();
+
+    if (!event) {
+        el.textContent = "📅 New Islamic year coming soon";
+        return;
+    }
+
+    const now = new Date();
+    const diff = event.date - now;
+
+    if (diff <= 0) {
+        el.textContent = `${event.icon} ${event.message}`;
+        return;
+    }
+
+    const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const weeks = Math.floor(totalDays / 7);
+    const days = totalDays % 7;
+
+    const newText = `${event.icon} ${event.name}: ${weeks} ${pluralize(weeks, "Week", "Weeks")} ${days} ${pluralize(days, "Day", "Days")}`;
+
+    // Fade out
+    el.style.opacity = 0;
+
+    setTimeout(() => {
+        el.innerHTML = newText;
+        el.style.opacity = 1;
+
+        setTimeout(() => {
+            isFading = false;
+        }, 1500);
+
+    }, 2000);
+}
+
+// ===============================
+// ▶ Start
+// ===============================
+setInterval(updateCountdown, 5000);
+updateCountdown();
+
+/* ================================
+   STOP ANIMATIONS WHEN NOT VISIBLE
+   ============================= */
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    document.body.style.animationPlayState = "paused";
+  } else {
+    document.body.style.animationPlayState = "running";
+  }
+});
+
+/* ===========================
+   SAFETY AUTO-RELOAD (LG TV)
+   =========================== */
+
+// Reload page every 3 hours to prevent memory leak
+setTimeout(() => {
+  location.reload();
+}, 3 * 60 * 60 * 1000); // 3 hours
+
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
