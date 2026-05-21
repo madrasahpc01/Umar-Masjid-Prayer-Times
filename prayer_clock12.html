@@ -462,6 +462,7 @@ document.addEventListener("visibilitychange", async () => {
 const audio = document.getElementById("bgAudio");
 
 let audioPlaying = false;
+const AUDIO_FILE = "background.mp3";
 
 /* ===========================
    SAFE PLAY AUDIO
@@ -471,14 +472,12 @@ async function playAudio() {
 
     try {
 
-        if (!audio || audioPlaying) return;
+        if (!audio) return;
 
-        // Restore source if removed
-        if (!audio.src || audio.src === "") {
+        // Restore source if missing
+        if (!audio.src || audio.src.indexOf(AUDIO_FILE) === -1) {
 
-            audio.innerHTML = `
-                <source src="background.mp3" type="audio/mpeg">
-            `;
+            audio.src = AUDIO_FILE;
 
             audio.load();
         }
@@ -491,7 +490,7 @@ async function playAudio() {
 
     } catch (e) {
 
-        console.log("Audio blocked until interaction");
+        console.log("Audio blocked:", e);
 
     }
 }
@@ -506,21 +505,13 @@ function stopAudio() {
 
     audio.pause();
 
-    // Reset playback
     audio.currentTime = 0;
-
-    // Force LG TV browser to fully stop stream
-    audio.removeAttribute("src");
-
-    audio.innerHTML = "";
-
-    audio.load();
 
     audioPlaying = false;
 
     console.log("🔇 Audio stopped");
 }
-
+	
 /* ===========================
    CURRENT TIME IN MINUTES
    =========================== */
