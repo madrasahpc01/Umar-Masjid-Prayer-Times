@@ -288,10 +288,6 @@
     <source src="silent.mp4" type="video/mp4">
 </video>
 
-<audio id="bgAudio" preload="auto" loop>
-    <source src="https://raw.githubusercontent.com/madrasahpc01/Umar-Masjid-Prayer-Times/main/background.mp3" type="audio/mpeg">
-</audio>
-
 <!-- HEADER -->
 <div id="header">
     <a href="index.html">
@@ -456,75 +452,199 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 /* ===========================
-   AUDIO SYSTEM (STABLE)
+   AUDIO SYSTEM (LG TV STABLE)
    =========================== */
 
 const audio = document.getElementById("bgAudio");
+
 let audioPlaying = false;
 
+/* ===========================
+   SAFE PLAY AUDIO
+   =========================== */
+
 async function playAudio() {
+
     try {
+
         if (!audio || audioPlaying) return;
 
+        // Restore source if removed
+        if (!audio.src || audio.src === "") {
+
+            audio.innerHTML = `
+                <source src="background.mp3" type="audio/mpeg">
+            `;
+
+            audio.load();
+        }
+
         await audio.play();
+
         audioPlaying = true;
 
+        console.log("▶ Audio playing");
+
     } catch (e) {
+
         console.log("Audio blocked until interaction");
+
     }
 }
 
+/* ===========================
+   HARD STOP AUDIO (LG TV SAFE)
+   =========================== */
+
 function stopAudio() {
+
     if (!audio) return;
 
     audio.pause();
+
+    // Reset playback
     audio.currentTime = 0;
+
+    // Force LG TV browser to fully stop stream
+    audio.removeAttribute("src");
+
+    audio.innerHTML = "";
+
+    audio.load();
+
     audioPlaying = false;
+
+    console.log("🔇 Audio stopped");
 }
 
+/* ===========================
+   CURRENT TIME IN MINUTES
+   =========================== */
+
 function nowMinutes() {
+
     const d = new Date();
+
     return d.getHours() * 60 + d.getMinutes();
 }
 
+/* ===========================
+   AUDIO END DATE
+   =========================== */
+
 const END_DATE = new Date("2026-05-30T23:59:59");
 
+/* ===========================
+   AUDIO SCHEDULE
+   =========================== */
+
+/*
+TEST MODE:
+00:00 → 02:00
+*/
+
 const schedule = [
-    { start: 02*60+05, end: 12*60+15 },
-	{ start: 12*60+20, end: 12*60+30 },
-    { start: 12*60+33, end: 12*60+45 },
-	{ start: 12*60+45, end: 13*60+29 },
-    { start: 16*60+30, end: 18*60+45 },
-    { start: 19*60+15, end: 21*60+04 },
-	{ start: 21*60+20, end: 21*60+14 },
-    { start: 22*60+45, end: 24*60 }
+
+    // 02:05 → 12:15
+    { start: 2 * 60 + 5, end: 12 * 60 + 15 },
+
+    // 12:20 → 12:30
+    { start: 12 * 60 + 20, end: 12 * 60 + 30 },
+
+    // 12:33 → 12:45
+    { start: 12 * 60 + 33, end: 12 * 60 + 45 },
+
+    // 12:45 → 13:29
+    { start: 12 * 60 + 45, end: 13 * 60 + 29 },
+
+    // 16:30 → 18:45
+    { start: 16 * 60 + 30, end: 18 * 60 + 45 },
+
+    // 19:15 → 21:04
+    { start: 19 * 60 + 15, end: 21 * 60 + 4 },
+
+    // FIXED: 21:20 → 22:14
+    { start: 21 * 60 + 20, end: 22 * 60 + 14 },
+
+    // 22:45 → Midnight
+    { start: 22 * 60 + 45, end: 24 * 60 }
+
 ];
+
+/* ===========================
+   AUDIO SCHEDULER
+   =========================== */
 
 let lastState = null;
 
 function audioScheduler() {
+
+    // Stop permanently after end date
     if (new Date() > END_DATE) {
+
         stopAudio();
+
         return;
     }
 
     const now = nowMinutes();
 
-    let shouldPlay = schedule.some(b => now >= b.start && now <= b.end);
+    // Check if current time is inside any schedule block
+    const shouldPlay = schedule.some(block => {
 
+        return now >= block.start && now <= block.end;
+
+    });
+
+    // START AUDIO
     if (shouldPlay && lastState !== "play") {
+
         playAudio();
+
         lastState = "play";
     }
 
+    // STOP AUDIO
     if (!shouldPlay && lastState !== "stop") {
+
         stopAudio();
+
         lastState = "stop";
     }
 }
 
+/* ===========================
+   RUN SCHEDULER
+   =========================== */
+
+// Check every 30 seconds
 setInterval(audioScheduler, 30000);
+
+// Run immediately
 audioScheduler();
+
+/* ===========================
+   USER INTERACTION UNLOCK
+   (Required on LG TVs)
+   =========================== */
+
+document.body.addEventListener("click", async () => {
+
+    try {
+
+        await playAudio();
+
+        audio.pause();
+
+        audio.currentTime = 0;
+
+        audioPlaying = false;
+
+        console.log("✅ Audio unlocked");
+
+    } catch (e) {}
+
+}, { once: true });
 
 /* ===========================
    01. Digital Clock
