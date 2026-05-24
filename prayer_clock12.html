@@ -232,6 +232,20 @@
         border-bottom: 2px solid #333;
     }
      
+    .eid-label {
+        color: #ffffff;
+    }
+
+    .eid-speech {
+        color: #22c55e;
+       text-shadow: 0 0 10px rgba(34,197,94,0.8);
+    }
+
+    .eid-prayer {
+        color: #facc15;
+        text-shadow: 0 0 10px rgba(250,204,21,0.9);
+    }
+
     #ramadanCountdown {
         opacity: 1;
         margin: 0;
@@ -405,19 +419,15 @@
   </div>
 
     <div id="info-bar">
-      <div class="row">
-        <span class="left-glow" id="infoLeft">
-            📢 EID Prayer 1: Speech 08:00 & Prayer 08:30
-        </span>
-      </div>
+        <div class="row">
+            <span class="left-glow" id="eidPrayer1"></span>
+        </div>
 
-      <div id="islamicCountdown" style="transition: opacity 2.5s;"></div>
+        <div id="islamicCountdown" style="transition: opacity 2.5s;"></div>
 
-      <div class="row">
-          <span class="right-glow" id="infoRight">
-            📢 EID Prayer 2: Speech 09:30 & Prayer 10:00
-          </span>
-      </div>
+        <div class="row">
+            <span class="right-glow" id="eidPrayer2"></span>
+        </div>
     </div>
 
   <!-- ANNOUNCEMENT BAR -->
@@ -426,24 +436,19 @@
   </div>
 
 <script>
-let state = {};  // FIXED
+let state = {};
 
 /* ===========================
    WAKE LOCK
-   =========================== */
-
+=========================== */
 let wakeLock = null;
 
 async function requestWakeLock() {
     try {
-        if (!('wakeLock' in navigator)) return;
-
-        wakeLock = await navigator.wakeLock.request('screen');
-
-        wakeLock.addEventListener('release', () => {
-            console.log("Wake Lock released");
-        });
-
+        if ("wakeLock" in navigator) {
+            wakeLock = await navigator.wakeLock.request("screen");
+            console.log("✅ Wake Lock active");
+        }
     } catch (err) {
         console.log("Wake Lock error:", err);
     }
@@ -456,257 +461,106 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 /* ===========================
-   AUDIO SYSTEM (LG TV STABLE)
-   =========================== */
-
+   AUDIO SYSTEM
+=========================== */
 const audio = document.getElementById("bgAudio");
 
-let audioPlaying = false;
-const AUDIO_FILE = "background.mp3";
+const AUDIO_FILE =
+"https://raw.githubusercontent.com/madrasahpc01/Umar-Masjid-Prayer-Times/main/background.mp3";
 
-/* ===========================
-   SAFE PLAY AUDIO
-   =========================== */
+let audioPlaying = false;
+let lastAudioState = null;
+
+function nowMinutes() {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+}
+
+const END_DATE = new Date("2026-05-30T23:59:59");
+
+const schedule = [
+    { start: 2 * 60 + 5, end: 12 * 60 + 15 },
+    { start: 12 * 60 + 20, end: 12 * 60 + 30 },
+    { start: 12 * 60 + 33, end: 13 * 60 + 29 },
+    { start: 16 * 60 + 30, end: 18 * 60 + 45 },
+    { start: 19 * 60 + 15, end: 21 * 60 + 4 },
+    { start: 21 * 60 + 20, end: 22 * 60 + 14 },
+    { start: 22 * 60 + 45, end: 24 * 60 }
+];
+
+function shouldAudioPlayNow() {
+    if (new Date() > END_DATE) return false;
+
+    const now = nowMinutes();
+    return schedule.some(block => now >= block.start && now <= block.end);
+}
 
 async function playAudio() {
-
     try {
+        if (!audio || audioPlaying) return;
 
-        if (!audio) return;
-
-        // Restore source if missing
-        if (!audio.src || audio.src.indexOf(AUDIO_FILE) === -1) {
-
+        if (!audio.src || !audio.src.includes("background.mp3")) {
             audio.src = AUDIO_FILE;
-
             audio.load();
         }
 
+        audio.volume = 0.6;
         await audio.play();
 
         audioPlaying = true;
-
         console.log("▶ Audio playing");
-
     } catch (e) {
-
-        console.log("Audio blocked:", e);
-
+        console.log("Audio blocked until screen is clicked:", e);
     }
 }
 
-/* ===========================
-   HARD STOP AUDIO (LG TV SAFE)
-   =========================== */
-
 function stopAudio() {
-
     if (!audio) return;
 
     audio.pause();
-
     audio.currentTime = 0;
-
     audioPlaying = false;
 
     console.log("🔇 Audio stopped");
 }
-	
-/* ===========================
-   CURRENT TIME IN MINUTES
-   =========================== */
-
-function nowMinutes() {
-
-    const d = new Date();
-
-    return d.getHours() * 60 + d.getMinutes();
-}
-
-/* ===========================
-   AUDIO END DATE
-   =========================== */
-
-const END_DATE = new Date("2026-05-30T23:59:59");
-
-/* ===========================
-   AUDIO SCHEDULE
-   =========================== */
-
-/*
-TEST MODE:
-00:00 → 02:00
-*/
-
-const schedule = [
-
-    // 02:05 → 12:15
-    { start: 2 * 60 + 5, end: 12 * 60 + 15 },
-
-    // 12:20 → 12:30
-    { start: 12 * 60 + 20, end: 12 * 60 + 30 },
-
-    // 12:33 → 12:45
-    { start: 12 * 60 + 33, end: 12 * 60 + 45 },
-
-    // 12:45 → 13:29
-    { start: 12 * 60 + 45, end: 13 * 60 + 29 },
-
-    // 16:30 → 18:45
-    { start: 16 * 60 + 30, end: 18 * 60 + 45 },
-
-    // 19:15 → 21:04
-    { start: 19 * 60 + 15, end: 21 * 60 + 4 },
-
-    // FIXED: 21:20 → 22:14
-    { start: 21 * 60 + 20, end: 22 * 60 + 14 },
-
-    // 22:45 → Midnight
-    { start: 22 * 60 + 45, end: 24 * 60 }
-
-];
-
-/* ===========================
-   AUDIO SCHEDULER
-   =========================== */
-
-let lastState = null;
 
 function audioScheduler() {
+    const playNow = shouldAudioPlayNow();
 
-    // Stop permanently after end date
-    if (new Date() > END_DATE) {
-
-        stopAudio();
-
-        return;
-    }
-
-    const now = nowMinutes();
-
-    // Check if current time is inside any schedule block
-    const shouldPlay = schedule.some(block => {
-
-        return now >= block.start && now <= block.end;
-
-    });
-
-    // START AUDIO
-    if (shouldPlay && lastState !== "play") {
-
+    if (playNow && lastAudioState !== "play") {
         playAudio();
-
-        lastState = "play";
+        lastAudioState = "play";
     }
 
-    // STOP AUDIO
-    if (!shouldPlay && lastState !== "stop") {
-
+    if (!playNow && lastAudioState !== "stop") {
         stopAudio();
-
-        lastState = "stop";
+        lastAudioState = "stop";
     }
 }
 
-/* ===========================
-   RUN SCHEDULER
-   =========================== */
-
-// Check every 30 seconds
 setInterval(audioScheduler, 30000);
 
-// Run immediately
-audioScheduler();
-
 /* ===========================
-   USER INTERACTION UNLOCK
-   (Required on LG TVs)
-   =========================== */
-
-document.body.addEventListener("click", async () => {
-
-    try {
-
-        await playAudio();
-
-        audio.pause();
-
-        audio.currentTime = 0;
-
-        audioPlaying = false;
-
-        console.log("✅ Audio unlocked");
-
-    } catch (e) {}
-
-}, { once: true });
-
-/* ===========================
-   01. Digital Clock
-   =========================== */
-function updateClock() {
-    const now = new Date();
-    document.getElementById("clock").innerText = now.toLocaleTimeString();
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-/* ===========================
-   02. Gregorian Date
-   =========================== */
-document.getElementById("gregorian-date").innerText =
-    new Date().toLocaleDateString("en-GB", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-/* HIJRI DATE */
-function updateHijri() {
-    const today = new Date();
-    const hijri = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-    }).format(today);
-
-    document.getElementById("hijri-date").innerText = hijri;
-}
-updateHijri();
-
-/* ===========================
-   SLIDESHOW ROTATION
+   FULLSCREEN SYSTEM
 =========================== */
-
-let slideIndex = 0;
-const slides = document.querySelectorAll(".slide");
-
-function showSlides() {
-    slides.forEach(slide => slide.classList.remove("active"));
-    slideIndex++;
-    if (slideIndex > slides.length) { slideIndex = 1 }
-    slides[slideIndex - 1].classList.add("active");
-}
-
-showSlides();
-setInterval(showSlides, 15000); // Change every 10 seconds
-
-/* ===========================
-   03. Full Screen (Hybrid)
-   =========================== */
-
-const fsToggle = document.getElementById("fsToggle");
-const fsIcon = document.getElementById("fsIcon");
 const controls = document.getElementById("fullscreen-controls");
-
 let hideTimeout;
+let fsInterval = null;
 
-/* FULLSCREEN TOGGLE */
 function goFullscreen() {
+    if (document.fullscreenElement) return;
+
     const elem = document.documentElement;
 
-    if (elem.requestFullscreen) elem.requestFullscreen();
-    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(() => {});
+    } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+    }
 
-    fsIcon.textContent = "✖"; 
-    autoHideControls();
+    showControls();
 }
 
 function exitFullscreen() {
@@ -714,37 +568,35 @@ function exitFullscreen() {
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     else if (document.msExitFullscreen) document.msExitFullscreen();
 
-    fsIcon.textContent = "⛶";
     showControls();
 }
 
 function toggleFullscreen() {
-    !document.fullscreenElement ? goFullscreen() : exitFullscreen();
+    if (!document.fullscreenElement) goFullscreen();
+    else exitFullscreen();
 }
 
-/* AUTO FULLSCREEN AFTER 10 SECONDS */
-setTimeout(() => {
-    if (!document.fullscreenElement) goFullscreen();
-}, 10000);
+function startFullscreenWatchdog() {
+    if (fsInterval) clearInterval(fsInterval);
 
-/* AUTO RE-ENTER FULLSCREEN IF USER EXITS */
+    fsInterval = setInterval(() => {
+        if (!document.fullscreenElement) {
+            goFullscreen();
+        }
+    }, 10000);
+}
+
 document.addEventListener("fullscreenchange", async () => {
-
     if (document.fullscreenElement) {
         await requestWakeLock();
-    }
-
-    if (!document.fullscreenElement) {
-        showControls();
-
-        setTimeout(() => {
-            if (!document.fullscreenElement) goFullscreen();
-        }, 2000);
+    } else {
+        setTimeout(goFullscreen, 2000);
     }
 });
 
-/* AUTO-HIDE CONTROLS */
 function showControls() {
+    if (!controls) return;
+
     controls.classList.remove("hidden");
     clearTimeout(hideTimeout);
 
@@ -753,91 +605,111 @@ function showControls() {
     }, 5000);
 }
 
-function autoHideControls() {
-    showControls();
-}
-
-/* SHOW CONTROLS ON MOUSE MOVE */
 document.addEventListener("mousemove", showControls);
 
-/* INITIAL HIDE */
-showControls();
-
-/* F11 OVERRIDE */
-document.addEventListener("keydown", (e) => {
+document.addEventListener("keydown", e => {
     if (e.key === "F11") {
         e.preventDefault();
         toggleFullscreen();
     }
 });
 
+/* ===========================
+   CLOCK + DATE
+=========================== */
+function updateClock() {
+    const clock = document.getElementById("clock");
+    if (clock) clock.innerText = new Date().toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+const gregorian = document.getElementById("gregorian-date");
+if (gregorian) {
+    gregorian.innerText = new Date().toLocaleDateString("en-GB", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+}
+
+function updateHijri() {
+    const hijriEl = document.getElementById("hijri-date");
+    if (!hijriEl) return;
+
+    hijriEl.innerText = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    }).format(new Date());
+}
+updateHijri();
 
 /* ===========================
-   04. Weather (safe)
-   =========================== */
+   SLIDESHOW
+=========================== */
+let slideIndex = 0;
+const slides = document.querySelectorAll(".slide");
+
+function showSlides() {
+    if (!slides.length) return;
+
+    slides.forEach(slide => slide.classList.remove("active"));
+    slideIndex = (slideIndex + 1) % slides.length;
+    slides[slideIndex].classList.add("active");
+}
+
+if (slides.length) {
+    slides[0].classList.add("active");
+    setInterval(showSlides, 15000);
+}
+
+/* ===========================
+   WEATHER
+=========================== */
 async function loadWeather() {
-  try {
-    const lat = state.coords.lat;
-    const lon = state.coords.lon;
+    try {
+        const lat = state.coords.lat;
+        const lon = state.coords.lon;
 
-    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-    const data = await res.json();
+        const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+        );
 
-    const temp = data.current_weather.temperature;
-    const wind = data.current_weather.windspeed;
-    const code = data.current_weather.weathercode;
+        const data = await res.json();
+        const temp = data.current_weather.temperature;
+        const wind = data.current_weather.windspeed;
+        const code = data.current_weather.weathercode;
 
-    const icons = {
-      0:"☀️",1:"🌤️",2:"⛅",3:"☁️",
-      45:"🌫️",48:"🌫️",
-      51:"🌦️",53:"🌦️",55:"🌦️",
-      61:"🌧️",63:"🌧️",65:"🌧️",
-      71:"❄️",73:"❄️",75:"❄️",
-      95:"⛈️",96:"⛈️",99:"⛈️"
-    };
+        const icons = {
+            0:"☀️",1:"🌤️",2:"⛅",3:"☁️",
+            45:"🌫️",48:"🌫️",
+            51:"🌦️",53:"🌦️",55:"🌦️",
+            61:"🌧️",63:"🌧️",65:"🌧️",
+            71:"❄️",73:"❄️",75:"❄️",
+            95:"⛈️",96:"⛈️",99:"⛈️"
+        };
 
-    const icon = icons[code] || "🌤️";
-
-    let tempColor = "#22c55e";
-    if (temp <= 0) tempColor = "#3b82f6";
-    else if (temp <= 10) tempColor = "#0ea5e9";
-    else if (temp <= 20) tempColor = "#22c55e";
-    else if (temp <= 30) tempColor = "#f59e0b";
-    else tempColor = "#ef4444";
-
-    const weatherEl = document.getElementById("weatherBox");
-    if (weatherEl)
-      weatherEl.innerHTML =
-  `<div style="display:flex;align-items:center;gap:8px;font-size:18px;">
-      <span>${icon}</span>
-      <span style="font-size:16px;font-weight:600;color:${tempColor};">🌡️ ${temp}°C</span>
-      <span style="font-size:14px;opacity:0.8;">💨 ${wind} km/h ⬅️ Weather</span>
-   </div>`;
-
-  } catch (err) {
-    console.error("Weather error", err);
-    const weatherEl = document.getElementById("weatherBox");
-    if (weatherEl) weatherEl.textContent = "Weather unavailable";
-  }
+        const weatherEl = document.getElementById("weatherBox");
+        if (weatherEl) {
+            weatherEl.innerHTML = `
+                <div style="display:flex;align-items:center;gap:8px;font-size:18px;">
+                    <span>${icons[code] || "🌤️"}</span>
+                    <span style="font-size:16px;font-weight:600;">🌡️ ${temp}°C</span>
+                    <span style="font-size:14px;opacity:0.8;">💨 ${wind} km/h</span>
+                </div>
+            `;
+        }
+    } catch (err) {
+        const weatherEl = document.getElementById("weatherBox");
+        if (weatherEl) weatherEl.textContent = "Weather unavailable";
+    }
 }
-
-async function init() {
-  state.coords = {
-    lat: 52.47107996227851,
-    lon: -2.0349574320927606
-  };
-
-  await loadWeather();
-  await requestWakeLock();
-}
-
-init(); // FIXED
-
 
 /* ===========================
-   ANNOUNCEMENT BAR (FIXED)
-   =========================== */
-
+   ANNOUNCEMENTS
+=========================== */
 const announcements = [
     "🕌 Welcome to the Umar Masjid News & Updates — Please maintain silence 🤫",
     "📘 Madrasah Timings: Mon to Fri from 5 PM to 06:30 PM",
@@ -854,39 +726,71 @@ const announcements = [
 let announcementIndex = 0;
 const announcementEl = document.getElementById("announcementText");
 
-// Force clean animation restart (TV-safe)
 function restartAnimation(el) {
     el.style.animation = "none";
-    el.offsetHeight; // ⚠️ forces reflow (CRITICAL)
+    el.offsetHeight;
     el.style.animation = "scroll-left 22s linear";
 }
 
 function showNextAnnouncement() {
+    if (!announcementEl) return;
+
     announcementEl.textContent = announcements[announcementIndex];
     announcementEl.style.opacity = "1";
-
     restartAnimation(announcementEl);
 
     announcementIndex = (announcementIndex + 1) % announcements.length;
 }
 
-// Run once immediately
 showNextAnnouncement();
-
-// Repeat forever (match animation duration)
 setInterval(showNextAnnouncement, 23000);
 
-// ===============================
-// Smart Islamic Countdown Widget
-// ===============================
+/* ===========================
+   EID PRAYER ROTATION
+=========================== */
 
-const el = document.getElementById("islamicCountdown");
+let eidToggle = false;
+
+function updateEidPrayerTimes() {
+    const eid1 = document.getElementById("eidPrayer1");
+    const eid2 = document.getElementById("eidPrayer2");
+
+    if (!eid1 || !eid2) return;
+
+    if (!eidToggle) {
+        eid1.innerHTML = `
+            <span class="eid-label">📢 Eid Prayer 1:</span>
+            <span class="eid-speech"> Speech at 08:00</span>
+        `;
+
+        eid2.innerHTML = `
+            <span class="eid-label">📢 Eid Prayer 2:</span>
+            <span class="eid-speech"> Speech at 09:30</span>
+        `;
+    } else {
+        eid1.innerHTML = `
+            <span class="eid-label">🕌 Eid Prayer 1:</span>
+            <span class="eid-prayer"> Prayer at 08:30</span>
+        `;
+
+        eid2.innerHTML = `
+            <span class="eid-label">🕌 Eid Prayer 2:</span>
+            <span class="eid-prayer"> Prayer at 10:00</span>
+        `;
+    }
+
+    eidToggle = !eidToggle;
+}
+
+updateEidPrayerTimes();
+setInterval(updateEidPrayerTimes, 3000);
+
+/* ===========================
+   ISLAMIC COUNTDOWN
+=========================== */
+const countdownEl = document.getElementById("islamicCountdown");
 let isFading = false;
 
-// ===============================
-// 📅 Key Islamic Dates (ESTIMATED)
-// Update yearly or replace with API later
-// ===============================
 const events = [
     {
         name: "Ramadan",
@@ -914,147 +818,106 @@ const events = [
     }
 ];
 
-// ===============================
-// 🔍 Get Next Upcoming Event
-// ===============================
 function getNextEvent() {
     const now = new Date();
 
-    // Sort events by soonest
-    const upcoming = events
+    return events
         .map(e => ({ ...e, diff: e.date - now }))
         .filter(e => e.diff > 0)
-        .sort((a, b) => a.diff - b.diff);
-
-    return upcoming.length ? upcoming[0] : null;
+        .sort((a, b) => a.diff - b.diff)[0] || null;
 }
 
-// ===============================
-// 🔢 Plural helper
-// ===============================
 function pluralize(value, singular, plural) {
     return value === 1 ? singular : plural;
 }
 
-// ===============================
-// 🔄 Update Countdown
-// ===============================
 function updateCountdown() {
-    if (isFading) return;
+    if (!countdownEl || isFading) return;
+
     isFading = true;
 
     const event = getNextEvent();
 
     if (!event) {
-        el.textContent = "📅 New Islamic year coming soon";
+        countdownEl.textContent = "📅 New Islamic year coming soon";
+        isFading = false;
         return;
     }
 
-    const now = new Date();
-    const diff = event.date - now;
-
-    if (diff <= 0) {
-        el.textContent = `${event.icon} ${event.message}`;
-        return;
-    }
-
+    const diff = event.date - new Date();
     const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
     const weeks = Math.floor(totalDays / 7);
     const days = totalDays % 7;
 
-    const newText = `${event.icon} ${event.name}: ${weeks} ${pluralize(weeks, "Week", "Weeks")} ${days} ${pluralize(days, "Day", "Days")}`;
+    const newText =
+        `${event.icon} ${event.name}: ${weeks} ${pluralize(weeks, "Week", "Weeks")} ${days} ${pluralize(days, "Day", "Days")}`;
 
-    // Fade out
-    el.style.opacity = 0;
+    countdownEl.style.opacity = 0;
 
     setTimeout(() => {
-        el.innerHTML = newText;
-        el.style.opacity = 1;
+        countdownEl.innerHTML = newText;
+        countdownEl.style.opacity = 1;
 
         setTimeout(() => {
             isFading = false;
         }, 1500);
-
     }, 2000);
 }
 
-// ===============================
-// ▶ Start
-// ===============================
 setInterval(updateCountdown, 5000);
 updateCountdown();
 
-/* ================================
-   STOP ANIMATIONS WHEN NOT VISIBLE
-   ============================= */
-
+/* ===========================
+   VISIBILITY
+=========================== */
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) {
-    document.body.style.animationPlayState = "paused";
-  } else {
-    document.body.style.animationPlayState = "running";
-  }
-});
-
-/* ===========================
-   SAFETY AUTO-RELOAD (LG TV)
-   =========================== */
-
-// Reload page every 3 hours to prevent memory leak
-setInterval(() => {
-   location.reload();
-}, 3 * 60 * 60 * 1000);
-
-/* ===========================
-   PAGE LOAD STARTUP
-   =========================== */
-
-window.addEventListener("load", async () => {
-
-    // Request wake lock
-    await requestWakeLock();
-
-    // Enter fullscreen
-    if (!document.fullscreenElement) {
-        goFullscreen();
-    }
-
+    document.body.style.animationPlayState =
+        document.hidden ? "paused" : "running";
 });
 
 /* ===========================
    INIT
-   =========================== */
-
+=========================== */
 async function init() {
     state.coords = {
         lat: 52.47107996227851,
         lon: -2.0349574320927606
     };
 
+    if (audio) {
+        audio.src = AUDIO_FILE;
+        audio.volume = 0.6;
+        audio.load();
+    }
+
     await loadWeather();
     await requestWakeLock();
 
-    if (audio) audio.volume = 0.6;
+    audioScheduler();
 
     goFullscreen();
     startFullscreenWatchdog();
+    showControls();
 }
 
 window.addEventListener("load", init);
 
-/* user interaction fallback */
-document.body.addEventListener("click", () => {
-    playAudio();
+/* Required for LG TV / Chrome audio unlock */
+document.body.addEventListener("click", async () => {
+    await requestWakeLock();
+
+    if (shouldAudioPlayNow()) {
+        await playAudio();
+    }
+
     goFullscreen();
 }, { once: true });
 
-/* safety reload */
-setInterval(() => location.reload(), 3 * 60 * 60 * 1000);
-
-
-
+/* Safety reload every 3 hours */
+setInterval(() => {
+    location.reload();
+}, 3 * 60 * 60 * 1000);
 </script>
 
 </body>
 </html>
-
