@@ -634,16 +634,32 @@ if (gregorian) {
     });
 }
 
-function updateHijri() {
-    const hijriEl = document.getElementById("hijri-date");
-    if (!hijriEl) return;
+/* ===========================
+   HIJRI DATE (UK ADJUSTED)
+=========================== */
 
-    hijriEl.innerText = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-    }).format(new Date());
+function updateHijri() {
+
+    // Create today's date
+    const today = new Date();
+
+    // Subtract 1 day to match UK moon sighting
+    today.setDate(today.getDate() - 1);
+
+    // Format Hijri date
+    const hijri = new Intl.DateTimeFormat(
+        "en-TN-u-ca-islamic",
+        {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        }
+    ).format(today);
+
+    // Display
+    document.getElementById("hijri-date").innerText = hijri;
 }
+
 updateHijri();
 
 /* ===========================
